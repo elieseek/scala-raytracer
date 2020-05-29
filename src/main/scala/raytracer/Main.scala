@@ -44,7 +44,7 @@ object Main extends App {
 
   def rayColour(r: Ray, world: Hittable) = {
     var rec = HitRecord(Vec3(0,0,0), Vec3(0,0,0), 0.0, false)
-    world.hit(r, 0, 10, rec) match {
+    world.hit(r, 0, PositiveInfinity, rec) match {
       case Some(i) => (i.normal + Vec3(1,1,1)) * 0.5
       case None =>
         val unitDirection = normalise(r.direction)
