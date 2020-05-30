@@ -61,4 +61,6 @@ object Vec3Utility {
       inUnitSphere * (-1)
     }
   }
+  
+  def reflectVec3(v: Vec3, n: Vec3) = v - n*2*dot(v,n)
 }

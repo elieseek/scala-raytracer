@@ -22,9 +22,10 @@ object Main extends App {
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
   var world = HittableList(ArrayBuffer[Hittable]())
-  world.add(Sphere(Vec3(0,0,-1), 0.5))
-  world.add(Sphere(Vec3(0,-100.5,-1), 100))
-
+  world.add(Sphere(Vec3(0,0,-1), 0.5, Lambertian(Vec3(0.7,0.3,0.3))))
+  world.add(Sphere(Vec3(0,-100.5,-1), 100, Lambertian(Vec3(0.8,0.8,0.0))))
+  world.add(Sphere(Vec3(1,0,-1), 0.5, Metal(Vec3(0.8,0.6,0.2))))
+  world.add(Sphere(Vec3(-1,0,-1), 0.5, Metal(Vec3(0.8,0.8,0.8))))
   val cam = Camera
 
   for (j <- imageHeight-1 to 0 by -1) {
@@ -42,14 +43,18 @@ object Main extends App {
   }
 
   def rayColour(r: Ray, world: Hittable, depth: Int): Vec3 = {
-    var rec = HitRecord(Vec3(0,0,0), Vec3(0,0,0), 0.0, false)
     if (depth <= 0) {
       Vec3(0, 0, 0)
     } else {
-      world.hit(r, 0.001, PositiveInfinity, rec) match {
-      case Some(i) => 
-        val target = i.p + i.normal + randomUnitVector()
-        rayColour(Ray(i.p, target - i.p), world, depth-1) * 0.5
+      world.hit(r, 0.001, PositiveInfinity) match {
+      case Some(record) => 
+        // record.mat.scatter(r, record) match {
+        //   case Some(scat) => 
+        //     rayColour(scat.scattered, world, depth-1) * scat.attenuation
+        //   case None => Vec3(0,0,0)
+        // }
+        val target = record.p + record.normal + randomUnitVector()
+        rayColour(Ray(record.p, target - record.p), world, depth-1) * 0.5
       case None =>
         val unitDirection = normalise(r.direction)
         val t = (unitDirection.y + 1) * 0.5
