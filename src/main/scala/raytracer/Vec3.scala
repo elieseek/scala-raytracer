@@ -61,6 +61,12 @@ object Vec3Utility {
       inUnitSphere * (-1)
     }
   }
+
+  def randomInUnitDisk() = {
+    var p = Vec3(randomDouble(-1, 1), randomDouble(-1, 1), 0)
+    while (p.lengthSquared >= 1) {p = Vec3(randomDouble(-1, 1), randomDouble(-1, 1), 0)}
+    p
+  }
   
   def reflectVec3(v: Vec3, n: Vec3) = v - n*2*dot(v,n)
 

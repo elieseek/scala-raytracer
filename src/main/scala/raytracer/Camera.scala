@@ -1,17 +1,37 @@
 package raytracer
 
-object Camera {
-  val aspectRatio = 16.0 / 9.0
-  val viewportHeight = 2.0
-  val viewportWidth = aspectRatio * viewportHeight
-  val focalLength = 1.0
+import scala.math.tan
+import Vec3Utility._
+import Utility._
 
-  val origin = Vec3(0, 0, 0)
-  val horizontal = Vec3(viewportWidth, 0, 0)
-  val vertical = Vec3(0, viewportHeight, 0)
-  val lowerLeftCorner = origin - horizontal/2 - vertical/2 - Vec3(0, 0,focalLength)
+case class Camera(
+  lookFrom: Vec3, 
+  lookAt: Vec3, 
+  vUp: Vec3,
+  vFov: Double, 
+  aspectRatio: Double,
+  aperture: Double,
+  focusDist: Double
+  ) {
+  val theta = degreesToRadians(vFov)
+  val h = tan(theta/2)
+  val viewportHeight = 2.0 * h
+  val viewportWidth = aspectRatio * viewportHeight
+
+  val w = normalise(lookFrom - lookAt)
+  val u = normalise(cross(vUp, w))
+  val v = cross(w, u)
+
+  val origin = lookFrom
+  val horizontal = u * viewportWidth * focusDist
+  val vertical = v * viewportHeight * focusDist
+  val lowerLeftCorner = origin - horizontal/2 - vertical/2 - w*focusDist
   
-  def getRay(u: Double, v: Double) = {
-    Ray(origin, lowerLeftCorner + horizontal*u + vertical*v - origin)
+  val lensRadius = aperture / 2 
+
+  def getRay(s: Double, t: Double) = {
+    val rd = randomInUnitDisk() * lensRadius
+    val offset = u * rd.x + v * rd.y
+    Ray(origin + offset, lowerLeftCorner + horizontal*s + vertical*t - origin - offset)
   }
 }
