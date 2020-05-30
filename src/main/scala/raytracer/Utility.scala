@@ -12,4 +12,14 @@ object Utility {
   def randomDouble(min: Double = 0.0, max: Double = 1.0) = {
     rand.between(min, max)
   }
+
+  def clamp(x: Double, min: Double, max: Double) = {
+    if (x < min) {
+      min
+    } else if (x > max) {
+      max
+    } else {
+      x
+    }
+  }
 }

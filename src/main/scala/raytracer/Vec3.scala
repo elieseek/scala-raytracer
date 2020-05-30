@@ -1,6 +1,7 @@
 package raytracer
 
 import scala.math.sqrt
+import Utility._
 
 case class Vec3(var x: Double, var y: Double, var z: Double) {
   def +(that: Vec3) = Vec3(this.x + that.x, this.y + that.y, this.z + that.z)
@@ -30,4 +31,14 @@ object Vec3Utility {
   }
 
   def normalise(v: Vec3) = v / v.length
+
+  def randomVec3(min: Double = 0.0, max: Double = 1.0) = {
+    Vec3(randomDouble(min, max), randomDouble(min, max), randomDouble(min, max))
+  }
+
+  def randomInUnitSphere() = {
+    var p = randomVec3(-1, 1)
+    while (p.lengthSquared >= 1) {p = randomVec3(-1, 1)}
+    p
+  }
 }

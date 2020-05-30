@@ -50,4 +50,10 @@ class Vec3Tests extends FunSpec {
       assert(normalise(v) == Vec3(1, 0, 0))
     }
   }
+  describe("Vec3 utilities") {
+    it("generates random unit vectors") {
+      val v = randomInUnitSphere()
+      assert((v.lengthSquared < 1) == true)
+    }
+  }
 }
