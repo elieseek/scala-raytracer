@@ -63,4 +63,11 @@ object Vec3Utility {
   }
   
   def reflectVec3(v: Vec3, n: Vec3) = v - n*2*dot(v,n)
+
+  def refractVec3(uv: Vec3, n: Vec3, etaiOverEtat: Double) = {
+    val cosTheta = dot(uv*(-1), n)
+    val rOutParallel = (uv + n*cosTheta) * etaiOverEtat
+    val rOutPerp = n* (-sqrt(1.0 - rOutParallel.lengthSquared))
+    rOutParallel + rOutPerp
+  }
 }
