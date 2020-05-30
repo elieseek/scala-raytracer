@@ -1,6 +1,9 @@
 package raytracer
 
 import scala.math.sqrt
+import scala.math.Pi
+import scala.math.sin
+import scala.math.cos
 import Utility._
 
 case class Vec3(var x: Double, var y: Double, var z: Double) {
@@ -40,5 +43,22 @@ object Vec3Utility {
     var p = randomVec3(-1, 1)
     while (p.lengthSquared >= 1) {p = randomVec3(-1, 1)}
     p
+  }
+
+  def randomUnitVector() = {
+    // Using lambertian distribution
+    val a = randomDouble(0, 2*Pi)
+    val z = randomDouble(-1,1)
+    val r = sqrt(1 - z*z)
+    Vec3(r*cos(a), r*sin(a), z)
+  }
+
+  def randomInHemisphere(normal: Vec3) = {
+    val inUnitSphere = randomInUnitSphere()
+    if(dot(inUnitSphere, normal) > 0.0) {
+      inUnitSphere
+    } else {
+      inUnitSphere * (-1)
+    }
   }
 }

@@ -46,9 +46,9 @@ object Main extends App {
     if (depth <= 0) {
       Vec3(0, 0, 0)
     } else {
-      world.hit(r, 0, PositiveInfinity, rec) match {
+      world.hit(r, 0.001, PositiveInfinity, rec) match {
       case Some(i) => 
-        val target = i.p + i.normal + randomInUnitSphere()
+        val target = i.p + i.normal + randomUnitVector()
         rayColour(Ray(i.p, target - i.p), world, depth-1) * 0.5
       case None =>
         val unitDirection = normalise(r.direction)
