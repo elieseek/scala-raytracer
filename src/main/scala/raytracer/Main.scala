@@ -24,8 +24,8 @@ object Main extends App {
   var world = HittableList(ArrayBuffer[Hittable]())
   world.add(Sphere(Vec3(0,0,-1), 0.5, Lambertian(Vec3(0.7,0.3,0.3))))
   world.add(Sphere(Vec3(0,-100.5,-1), 100, Lambertian(Vec3(0.8,0.8,0.0))))
-  world.add(Sphere(Vec3(1,0,-1), 0.5, Metal(Vec3(0.8,0.6,0.2))))
-  world.add(Sphere(Vec3(-1,0,-1), 0.5, Metal(Vec3(0.8,0.8,0.8))))
+  world.add(Sphere(Vec3(1,0,-1), 0.5, Metal(Vec3(0.8,0.6,0.2), 1)))
+  world.add(Sphere(Vec3(-1,0,-1), 0.5, Metal(Vec3(0.8,0.8,0.8), 0.3)))
   val cam = Camera
 
   for (j <- imageHeight-1 to 0 by -1) {
