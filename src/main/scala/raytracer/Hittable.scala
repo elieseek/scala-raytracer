@@ -3,7 +3,7 @@ package raytracer
 import Vec3Utility._
 
 trait Hittable {
-  def hit(r: Ray, tMin: Double, tMax: Double): Option[HitRecord]
+  def hit(r: Ray, tMin: Double, tMax: Double, record: HitRecord): Option[HitRecord]
 }
 
 case class HitRecord(var p: Vec3, var normal: Vec3, var mat: Material, var t: Double, var frontFace: Boolean) {

@@ -43,18 +43,17 @@ object Main extends App {
   }
 
   def rayColour(r: Ray, world: Hittable, depth: Int): Vec3 = {
+    var record = HitRecord(Vec3(0,0,0), Vec3(0,0,0), Lambertian(Vec3(0,0,0)), 0.0, false)
     if (depth <= 0) {
       Vec3(0, 0, 0)
     } else {
-      world.hit(r, 0.001, PositiveInfinity) match {
-      case Some(record) => 
-        // record.mat.scatter(r, record) match {
-        //   case Some(scat) => 
-        //     rayColour(scat.scattered, world, depth-1) * scat.attenuation
-        //   case None => Vec3(0,0,0)
-        // }
-        val target = record.p + record.normal + randomUnitVector()
-        rayColour(Ray(record.p, target - record.p), world, depth-1) * 0.5
+      world.hit(r, 0.001, PositiveInfinity, record) match {
+      case Some(newRecord) => 
+        newRecord.mat.scatter(r, newRecord) match {
+          case Some(scatter) => 
+            rayColour(scatter.scattered, world, depth-1) * scatter.attenuation
+          case None => Vec3(0,0,0)
+        }
       case None =>
         val unitDirection = normalise(r.direction)
         val t = (unitDirection.y + 1) * 0.5
