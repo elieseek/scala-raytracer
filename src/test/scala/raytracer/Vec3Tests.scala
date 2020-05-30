@@ -1,4 +1,5 @@
 package raytracer
+
 import org.scalatest.FunSpec
 import Vec3Utility._
 

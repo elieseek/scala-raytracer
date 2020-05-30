@@ -1,9 +1,15 @@
 package raytracer
 
 import scala.math.Pi
+import scala.util.Random
 
-case class Utility() {
+object Utility {
+  val rand = new Random()
   def degreesToRadians(deg: Double) = {
     deg * Pi / 180
+  }
+  
+  def randomDouble(min: Double = 0.0, max: Double = 1.0) = {
+    rand.between(min, max)
   }
 }
