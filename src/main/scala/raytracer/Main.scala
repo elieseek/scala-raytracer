@@ -15,19 +15,21 @@ import Camera._
 
 object Main extends App {
   val aspectRatio = 16.0 / 9.0
-  val imageWidth = 384
+  val imageWidth = 1920
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
   val samplesPerPixel = 100
   val maxDepth = 50
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
-  var world = HittableList(ArrayBuffer[Hittable]())
-  world.add(Sphere(Vec3(0,0,-1), 0.5, Lambertian(Vec3(0.1,0.2,0.5))))
-  world.add(Sphere(Vec3(0,-100.5,-1), 100, Lambertian(Vec3(0.8,0.8,0.0))))
-  world.add(Sphere(Vec3(1,0,-1), 0.5, Metal(Vec3(0.8,0.6,0.2), 0.0)))
-  world.add(Sphere(Vec3(-1,0,-1), 0.5, Dialectric(1.5)))
-  world.add(Sphere(Vec3(-1,0,-1), -0.45, Dialectric(1.5)))
-  val cam = Camera
+  var world = Scene.randomScene()
+
+  // Set up camera
+  val lookFrom = Vec3(13,2,3)
+  val lookAt = Vec3(0,0,0)
+  val vUp = Vec3(0,1,0)
+  val distToFocus = 10.0
+  val aperture = 0.1
+  val cam = Camera(lookFrom, lookAt, vUp, 20, aspectRatio, aperture, distToFocus)
 
   for (j <- imageHeight-1 to 0 by -1) {
     System.err.print(s"\rScanlines remaining: $j")
@@ -62,5 +64,50 @@ object Main extends App {
       }
     }
     
+  }
+}
+
+object Scene {
+  def randomScene() = {
+    var world = HittableList(ArrayBuffer[Hittable]())
+    val groundMaterial = Lambertian(Vec3(0.5, 0.5, 0.5))
+    world.add(Sphere(Vec3(0,-1000,0), 1000, groundMaterial))
+
+    for (a <- -11 until 11) {
+      for (b <- -11 until 11) {
+        val chooseMat = randomDouble()
+        val centre = Vec3(a + randomDouble() * 0.9, 0.2, b + randomDouble()*0.9)
+
+        if ((centre - Vec3(4, 0.2, 0)).length() > 0.9) {
+
+          if (chooseMat < 0.8) {
+            // diffuse
+            val albedo = randomVec3() * randomVec3()
+            val sphereMaterial = Lambertian(albedo)
+            world.add(Sphere(centre, 0.2, sphereMaterial))
+          } else if (chooseMat < 0.95) {
+            // metal
+            val albedo = randomVec3(0.5, 1)
+            val fuzz = randomDouble(0, 0.5)
+            val sphereMaterial = Metal(albedo, fuzz)
+            world.add(Sphere(centre, 0.2, sphereMaterial))
+          } else {
+            // glass
+            val sphereMaterial = Dialectric(1.5)
+            world.add(Sphere(centre, 0.2, sphereMaterial))
+          }
+        }
+      }
+    }
+    val material1 = Dialectric(1.5)
+    world.add(Sphere(Vec3(0, 1, 0), 1.0, material1))
+    
+    val material2 = Lambertian(Vec3(0.4, 0.2, 0.1))
+    world.add(Sphere(Vec3(-3, 1, 0), 1.0, material2))
+
+    val material3 = Metal(Vec3(0.7, 0.6, 0.5), 0.0)
+    world.add(Sphere(Vec3(4, 1, 0), 1.0, material3))
+
+    world
   }
 }
