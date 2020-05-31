@@ -29,9 +29,9 @@ object Colour {
     g = sqrt(scale * g)
     b = sqrt(scale * b)
 
-    val ir = (256 * clamp(r, 0.0, 0.999)).toInt
-    val ig = (256 * clamp(g, 0.0, 0.999)).toInt
-    val ib = (256 * clamp(b, 0.0, 0.999)).toInt
+    val ir = clamp((256 * clamp(r, 0.0, 0.999)), 0, 256).toInt
+    val ig = clamp((256 * clamp(g, 0.0, 0.999)), 0, 256).toInt
+    val ib = clamp((256 * clamp(b, 0.0, 0.999)), 0, 256).toInt
     Vector(ir, ig, ib)
   }
 
