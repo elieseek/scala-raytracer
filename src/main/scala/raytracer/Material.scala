@@ -52,6 +52,12 @@ case class Dialectric(refIndex: Double) extends Material {
   }
 }
 
+case class Light(colour: Vec3, intensity: Double) extends Material {
+  def scatter(rIn: Ray, rec: HitRecord) = {
+    Some(Scatter(rIn, colour*intensity))
+  }
+}
+
 object MaterialUtility {
   def schlick(cosine: Double, refIndex: Double) = {
     var r0 = (1-refIndex) / (1+refIndex)

@@ -4,7 +4,6 @@ import scala.math.sqrt
 import Vec3Utility._
 
 case class Sphere(centre: Vec3, radius: Double, material: Material) extends Hittable {
-  
   // solves quadratic t^2b.b + 2tb.(A−C) + (A−C).(A−C) − r^2 = 0
   // where ray = Ray(A, b), centre = C
   def hit(r: Ray, tMin: Double, tMax: Double): Option[HitRecord] = {

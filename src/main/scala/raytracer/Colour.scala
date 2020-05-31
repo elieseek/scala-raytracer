@@ -41,7 +41,7 @@ object Colour {
     }
   }
   
-  def averageImageArrays(a1: ArrayBuffer[Vector[Int]], a2: ArrayBuffer[Vector[Int]], a3: ArrayBuffer[Vector[Int]], a4: ArrayBuffer[Vector[Int]], samplesPerPixel: Int) = {
+  def averageImageArrays(a1: ArrayBuffer[Vector[Int]], a2: ArrayBuffer[Vector[Int]], a3: ArrayBuffer[Vector[Int]], a4: ArrayBuffer[Vector[Int]]) = {
     val imageArray = new ArrayBuffer[Vector[Int]]
     for (i <- 0 until a1.length) {
       val avgR = (a1(i)(0) + a2(i)(0) + a3(i)(0)+ a4(i)(0)).toDouble / (4).toDouble
@@ -76,15 +76,22 @@ object Colour {
     } else {
       world.hit(r, 0.001, PositiveInfinity)match {
       case Some(newRecord: HitRecord) => 
-        newRecord.mat.scatter(r, newRecord) match {
-          case Some(scatter: Scatter) => 
-            rayColour(scatter.scattered, world, depth-1) * scatter.attenuation
-          case None => Vec3(0,0,0)
+        newRecord.mat match {
+          case light: Light => newRecord.mat.scatter(r, newRecord) match {
+            case Some(scatter) => scatter.attenuation
+            case None => Vec3(0, 0, 0)
+          }
+          case material: Material =>
+            material.scatter(r, newRecord) match {
+            case Some(scatter: Scatter) => 
+              rayColour(scatter.scattered, world, depth-1) * scatter.attenuation
+            case None => Vec3(0,0,0)
+          }
         }
       case None =>
         val unitDirection = normalise(r.direction)
         val t = (unitDirection.y + 1) * 0.5
-        Vec3(1,1,1)*(1.0 - t) + Vec3(0.5,0.7,1.0)*t
+        (Vec3(1,1,1)*(1.0 - t) + Vec3(0.5,0.7,1.0)*t)*0.15
       }
     }
   }
