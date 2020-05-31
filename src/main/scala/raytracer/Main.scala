@@ -21,7 +21,7 @@ object Main extends App {
   val aspectRatio = 16.0 / 9.0
   val imageWidth = 384
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 25
+  val samplesPerPixel = 512
   val maxDepth = 50
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
@@ -103,8 +103,8 @@ object Scene {
     val material1 = Dialectric(1.5)
     world.add(Sphere(Vec3(0, 1, 0), 1.0, material1))
     
-    val material2 = Lambertian(Vec3(0.4, 0.2, 0.1))
-    world.add(Sphere(Vec3(-3, 1, 0), 1.0, material2))
+    val material2 = Light(Vec3(10, 6, 4))
+    world.add(Sphere(Vec3(-3, 1, -2), 1.0, material2))
 
     val material3 = Metal(Vec3(0.7, 0.6, 0.5), 0.0)
     world.add(Sphere(Vec3(4, 1, 0), 1.0, material3))
