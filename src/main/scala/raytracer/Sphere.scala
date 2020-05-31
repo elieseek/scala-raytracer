@@ -7,7 +7,7 @@ case class Sphere(centre: Vec3, radius: Double, material: Material) extends Hitt
   // solves quadratic t^2b.b + 2tb.(A−C) + (A−C).(A−C) − r^2 = 0
   // where ray = Ray(A, b), centre = C
   def hit(r: Ray, tMin: Double, tMax: Double): Option[HitRecord] = {
-    var rec = HitRecord(Vec3(0,0,0), Vec3(0,0,0), Lambertian(Vec3(0,0,0)), 0.0, false)
+    var rec = HitRecord(Vec3(0,0,0), Vec3(0,0,0), Lambertian(Vec3(0,0,0)), 0.0, false, Sphere(Vec3(0,0,0), 0.0, Lambertian(Vec3(0,0,0))))
     val oc = r.origin - centre
     val a = r.direction.lengthSquared
     val halfB = dot(oc, r.direction)
@@ -22,6 +22,7 @@ case class Sphere(centre: Vec3, radius: Double, material: Material) extends Hitt
         var outwardNormal = (rec.p - centre) / radius
         rec.setFaceNormal(r, outwardNormal)
         rec.mat = material
+        rec.obj = this
         Some(rec)
       } else {
         temp = (-halfB + root)/a
@@ -31,6 +32,7 @@ case class Sphere(centre: Vec3, radius: Double, material: Material) extends Hitt
           var outwardNormal = (rec.p - centre) / radius
           rec.setFaceNormal(r, outwardNormal)
           rec.mat = material
+          rec.obj = this
           Some(rec)
         } else {
           None

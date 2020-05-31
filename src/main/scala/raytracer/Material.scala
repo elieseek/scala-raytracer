@@ -1,5 +1,6 @@
 package raytracer
 
+import scala.Double.PositiveInfinity
 import scala.math.sqrt
 import scala.math.pow
 import Vec3Utility._
@@ -31,22 +32,26 @@ case class Metal(albedo: Vec3, fuzz: Double) extends Material {
   }
 }
 
-case class Dialectric(refIndex: Double) extends Material {
+case class Dialectric(refIndex: Double, albedo: Vec3, opacity: Double) extends Material {
   def scatter(rIn: Ray, rec: HitRecord) = {
-    val attenuation = Vec3(1.0, 1.0, 1.0)
     val etaiOverEtat = if (rec.frontFace) 1.0 / refIndex else refIndex
     val unitDirection = normalise(rIn.direction())
     val cosTheta = clamp(dot(unitDirection*(-1),rec.normal), -1, 1)
     val sinTheta = sqrt(1.0 - cosTheta*cosTheta)
     // account for total internal reflection
-    if (etaiOverEtat * sinTheta > 1.0) {
+    if  ((etaiOverEtat * sinTheta > 1.0) || 
+        (randomDouble() < MaterialUtility.schlick(cosTheta, etaiOverEtat))) {
       val reflected = reflectVec3(unitDirection, rec.normal)
-      Some(Scatter(Ray(rec.p, reflected), attenuation))
-    } else if (randomDouble() < MaterialUtility.schlick(cosTheta, etaiOverEtat)) {
-      val reflected = reflectVec3(unitDirection, rec.normal)
-      Some(Scatter(Ray(rec.p, reflected), attenuation))
+      Some(Scatter(Ray(rec.p, reflected), Vec3(1,1,1)))
     } else {
       val refracted = refractVec3(unitDirection, rec.normal, etaiOverEtat)
+      val interiorDir = if (rec.frontFace) refracted else refracted * (-1)
+      val interiorRay = Ray(rec.p, interiorDir)
+      val mediumTraveled = rec.obj.hit(interiorRay, 0.001, PositiveInfinity) match {
+        case Some(i: HitRecord) => if (i.obj == rec.obj ) (i.p - rec.p).length() else 0
+        case None => 0
+      }
+      val attenuation = clampVec3(Vec3(1,1,1) - albedo*mediumTraveled*opacity, 0, 1)
       Some(Scatter(Ray(rec.p, refracted), attenuation))
     }
   }

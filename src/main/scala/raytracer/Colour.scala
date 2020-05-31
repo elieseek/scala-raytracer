@@ -74,7 +74,7 @@ object Colour {
     if (depth <= 0) {
       Vec3(0, 0, 0)
     } else {
-      world.hit(r, 0.001, PositiveInfinity)match {
+      world.hit(r, 0.001, PositiveInfinity) match {
       case Some(newRecord: HitRecord) => 
         newRecord.mat match {
           case light: Light => newRecord.mat.scatter(r, newRecord) match {
@@ -91,7 +91,7 @@ object Colour {
       case None =>
         val unitDirection = normalise(r.direction)
         val t = (unitDirection.y + 1) * 0.5
-        (Vec3(1,1,1)*(1.0 - t) + Vec3(0.5,0.7,1.0)*t)*0.15
+        (Vec3(1,1,1)*(1.0 - t) + Vec3(0.5,0.7,1.0)*t)*Vec3(0.15, 0.15, 0.15)
       }
     }
   }

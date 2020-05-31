@@ -33,6 +33,8 @@ object Vec3Utility {
     )
   }
 
+  def clampVec3(v: Vec3, min: Double, max: Double) = Vec3(clamp(v.x, min, max), clamp(v.y, min, max), clamp(v.z, min, max))
+
   def normalise(v: Vec3) = v / v.length
 
   def randomVec3(min: Double = 0.0, max: Double = 1.0) = {
