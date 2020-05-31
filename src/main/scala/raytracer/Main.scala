@@ -45,7 +45,7 @@ object Main extends App {
     f2Result <- futureArray2
     f3Result <- futureArray3
     f4Result <- futureArray4
-  } yield averageImageArrays(f1Result, f2Result, f3Result, f4Result, samplesPerPixel)
+  } yield averageImageArrays(f1Result, f2Result, f3Result, f4Result)
 
   val imageArray = Await.result(aggFuture, Duration.Inf)
   writeColourArray(imageArray)

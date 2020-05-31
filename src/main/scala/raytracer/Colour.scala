@@ -41,7 +41,7 @@ object Colour {
     }
   }
   
-  def averageImageArrays(a1: ArrayBuffer[Vector[Int]], a2: ArrayBuffer[Vector[Int]], a3: ArrayBuffer[Vector[Int]], a4: ArrayBuffer[Vector[Int]], samplesPerPixel: Int) = {
+  def averageImageArrays(a1: ArrayBuffer[Vector[Int]], a2: ArrayBuffer[Vector[Int]], a3: ArrayBuffer[Vector[Int]], a4: ArrayBuffer[Vector[Int]]) = {
     val imageArray = new ArrayBuffer[Vector[Int]]
     for (i <- 0 until a1.length) {
       val avgR = (a1(i)(0) + a2(i)(0) + a3(i)(0)+ a4(i)(0)).toDouble / (4).toDouble
