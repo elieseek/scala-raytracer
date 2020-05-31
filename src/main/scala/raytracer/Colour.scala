@@ -71,11 +71,10 @@ object Colour {
   }
 
   def rayColour(r: Ray, world: Hittable, depth: Int): Vec3 = {
-    var record = HitRecord(Vec3(0,0,0), Vec3(0,0,0), Lambertian(Vec3(0,0,0)), 0.0, false)
     if (depth <= 0) {
       Vec3(0, 0, 0)
     } else {
-      world.hit(r, 0.001, PositiveInfinity, record)match {
+      world.hit(r, 0.001, PositiveInfinity)match {
       case Some(newRecord: HitRecord) => 
         newRecord.mat.scatter(r, newRecord) match {
           case Some(scatter: Scatter) => 
