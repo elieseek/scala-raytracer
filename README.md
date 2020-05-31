@@ -8,3 +8,4 @@ Learning scala by trying to create a raytracer using [this guide](https://raytra
 - Case classes used instead of shared pointers for materials and spheres
 - Multithreaded
 - Added lighting material
+- Added glass colouring and opacity
