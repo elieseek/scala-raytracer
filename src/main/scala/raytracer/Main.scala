@@ -1,7 +1,11 @@
 package raytracer
 
-import scala.Double.PositiveInfinity
 import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.Future
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success}
 
 import scala.math.sqrt
 import Vec3._
@@ -15,9 +19,9 @@ import Camera._
 
 object Main extends App {
   val aspectRatio = 16.0 / 9.0
-  val imageWidth = 1920
+  val imageWidth = 384
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 100
+  val samplesPerPixel = 1
   val maxDepth = 50
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
@@ -30,41 +34,20 @@ object Main extends App {
   val distToFocus = 10.0
   val aperture = 0.1
   val cam = Camera(lookFrom, lookAt, vUp, 20, aspectRatio, aperture, distToFocus)
+  val futureArray1 = Future {calcImageArray(cam, world, imageHeight, imageWidth, samplesPerPixel, maxDepth)}
+  val futureArray2 = Future {calcImageArray(cam, world, imageHeight, imageWidth, samplesPerPixel, maxDepth)}
+  val futureArray3 = Future {calcImageArray(cam, world, imageHeight, imageWidth, samplesPerPixel, maxDepth)}
+  val futureArray4 = Future {calcImageArray(cam, world, imageHeight, imageWidth, samplesPerPixel, maxDepth)}
+  
+  val aggFuture = for{
+    f1Result <- futureArray1
+    f2Result <- futureArray2
+    f3Result <- futureArray3
+    f4Result <- futureArray4
+  } yield averageImageArrays(f1Result, f2Result, f3Result, f4Result, samplesPerPixel)
 
-  for (j <- imageHeight-1 to 0 by -1) {
-    System.err.print(s"\rScanlines remaining: $j")
-    for (i <- 0 until imageWidth) {
-      var pixelColour = Vec3(0, 0, 0)
-      for (s <- 0 until samplesPerPixel) {
-        var u = (i + randomDouble()) / (imageWidth-1).toDouble
-        val v = (j + randomDouble()) / (imageHeight-1).toDouble
-        var r = cam.getRay(u, v)
-        pixelColour += rayColour(r, world, maxDepth)
-      }
-      writeColour(pixelColour, samplesPerPixel)
-    }
-  }
-
-  def rayColour(r: Ray, world: Hittable, depth: Int): Vec3 = {
-    var record = HitRecord(Vec3(0,0,0), Vec3(0,0,0), Lambertian(Vec3(0,0,0)), 0.0, false)
-    if (depth <= 0) {
-      Vec3(0, 0, 0)
-    } else {
-      world.hit(r, 0.001, PositiveInfinity, record) match {
-      case Some(newRecord) => 
-        newRecord.mat.scatter(r, newRecord) match {
-          case Some(scatter) => 
-            rayColour(scatter.scattered, world, depth-1) * scatter.attenuation
-          case None => Vec3(0,0,0)
-        }
-      case None =>
-        val unitDirection = normalise(r.direction)
-        val t = (unitDirection.y + 1) * 0.5
-        Vec3(1,1,1)*(1.0 - t) + Vec3(0.5,0.7,1.0)*t
-      }
-    }
-    
-  }
+  val imageArray = Await.result(aggFuture, Duration.Inf)
+  writeColourArray(imageArray)
 }
 
 object Scene {
