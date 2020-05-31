@@ -41,12 +41,12 @@ object Colour {
     }
   }
   
-  def averageImageArrays(a1: ArrayBuffer[Vector[Int]], a2: ArrayBuffer[Vector[Int]], a3: ArrayBuffer[Vector[Int]], a4: ArrayBuffer[Vector[Int]]) = {
+  def averageImageArrays(arrays: IndexedSeq[ArrayBuffer[Vector[Int]]], numThreads: Int) = {
     val imageArray = new ArrayBuffer[Vector[Int]]
-    for (i <- 0 until a1.length) {
-      val avgR = (a1(i)(0) + a2(i)(0) + a3(i)(0)+ a4(i)(0)).toDouble / (4).toDouble
-      val avgG = (a1(i)(1) + a2(i)(1) + a3(i)(1)+ a4(i)(1)).toDouble / (4).toDouble
-      val avgB = (a1(i)(2) + a2(i)(2) + a3(i)(2)+ a4(i)(2)).toDouble / (4).toDouble
+    for (i <- 0 until arrays(0).length) {
+      val avgR = (arrays.map(x => x(i)(0)).reduce(_+_)).toDouble / (numThreads).toDouble
+      val avgG = (arrays.map(x => x(i)(1)).reduce(_+_)).toDouble / (numThreads).toDouble
+      val avgB = (arrays.map(x => x(i)(2)).reduce(_+_)).toDouble / (numThreads).toDouble
       imageArray.append(Vector(avgR.toInt, avgG.toInt, avgB.toInt))
     }
     imageArray

@@ -5,6 +5,8 @@ import scala.concurrent.Future
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
+import java.util.concurrent.Executors
 import scala.util.{Failure, Success}
 
 import scala.math.sqrt
@@ -23,10 +25,11 @@ object Main extends App {
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
   val samplesPerPixel = 512
   val maxDepth = 50
+  val numThreads = 4
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
-  //var world = Scene.randomScene()
-  var world = Scene.staticScene()
+  var world = Scene.randomScene()
+  //var world = Scene.staticScene()
 
   // Set up camera
   val lookFrom = Vec3(13,2,3)
@@ -35,19 +38,14 @@ object Main extends App {
   val distToFocus = 10.0
   val aperture = 0.1
   val cam = Camera(lookFrom, lookAt, vUp, 20, aspectRatio, aperture, distToFocus)
-  val futureArray1 = Future {calcImageArray(cam, world, imageHeight, imageWidth, samplesPerPixel, maxDepth)}
-  val futureArray2 = Future {calcImageArray(cam, world, imageHeight, imageWidth, samplesPerPixel, maxDepth)}
-  val futureArray3 = Future {calcImageArray(cam, world, imageHeight, imageWidth, samplesPerPixel, maxDepth)}
-  val futureArray4 = Future {calcImageArray(cam, world, imageHeight, imageWidth, samplesPerPixel, maxDepth)}
   
-  val aggFuture = for{
-    f1Result <- futureArray1
-    f2Result <- futureArray2
-    f3Result <- futureArray3
-    f4Result <- futureArray4
-  } yield averageImageArrays(f1Result, f2Result, f3Result, f4Result)
-
-  val imageArray = Await.result(aggFuture, Duration.Inf)
+  val futures = (0 until numThreads).map { 
+    x => Future {
+      calcImageArray(cam, world, imageHeight, imageWidth, samplesPerPixel, maxDepth)
+    }
+  }
+  val aggFuture = Future.sequence(futures)
+  val imageArray = averageImageArrays(Await.result(aggFuture, Duration.Inf), numThreads)
   writeColourArray(imageArray)
 }
 
@@ -92,6 +90,8 @@ object Scene {
     val material3 = Metal(Vec3(0.7, 0.6, 0.5), 0.0)
     world.add(Sphere(Vec3(4, 1, 0), 1.0, material3))
 
+    world.add(Sphere(Vec3(-30, 200, -200), 100.0, Light(Vec3(1.0, 0.6, 0.4), 10)))
+
     world
   }
 
@@ -104,7 +104,7 @@ object Scene {
     world.add(Sphere(Vec3(0, 1, 0), 1.0, material1))
     
     val material2 = Light(Vec3(1.0, 0.6, 0.4), 10)
-    world.add(Sphere(Vec3(-3, 1, -2), 1.0, material2))
+    world.add(Sphere(Vec3(-30, 200, -200), 100.0, material2))
 
     val material3 = Metal(Vec3(0.7, 0.6, 0.5), 0.0)
     world.add(Sphere(Vec3(4, 1, 0), 1.0, material3))
