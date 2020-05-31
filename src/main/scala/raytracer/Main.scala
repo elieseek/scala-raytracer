@@ -103,7 +103,7 @@ object Scene {
     val material1 = Dialectric(1.5)
     world.add(Sphere(Vec3(0, 1, 0), 1.0, material1))
     
-    val material2 = Light(Vec3(10, 6, 4))
+    val material2 = Light(Vec3(1.0, 0.6, 0.4), 10)
     world.add(Sphere(Vec3(-3, 1, -2), 1.0, material2))
 
     val material3 = Metal(Vec3(0.7, 0.6, 0.5), 0.0)
