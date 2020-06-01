@@ -47,8 +47,8 @@ case class Dialectric(refIndex: Double, albedo: Vec3, opacity: Double) extends M
       val refracted = refractVec3(unitDirection, rec.normal, etaiOverEtat)
       val interiorDir = if (rec.frontFace) refracted else refracted * (-1)
       val interiorRay = Ray(rec.p, interiorDir)
-      val mediumTraveled = rec.obj.hit(interiorRay, 0.001, PositiveInfinity) match {
-        case Some(i: HitRecord) => if (i.obj == rec.obj ) (i.p - rec.p).length() else 0
+      val mediumTraveled = rec.obj.hit(interiorRay, 0.00001, PositiveInfinity) match {
+        case Some(i: HitRecord) => (i.p - rec.p).length()
         case None => 0
       }
       val attenuation = clampVec3(Vec3(1,1,1) - albedo*mediumTraveled*opacity, 0, 1)
