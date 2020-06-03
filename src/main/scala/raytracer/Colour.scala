@@ -52,7 +52,7 @@ object Colour {
     imageArray
   }
 
-  def calcImageArray(cam: Camera, world: HittableList, imageHeight: Int, imageWidth: Int, samplesPerPixel: Int, maxDepth: Int) = {
+  def calcImageArray(cam: Camera, world: Hittable, imageHeight: Int, imageWidth: Int, samplesPerPixel: Int, maxDepth: Int) = {
     val imageArray = new ArrayBuffer[Vector[Int]]
     for (j <- imageHeight-1 to 0 by -1) {
       System.err.print(s"\rScanlines remaining: $j")
@@ -89,7 +89,7 @@ object Colour {
       case None =>
         val unitDirection = normalise(r.direction)
         val t = (unitDirection.y + 1) * 0.5
-        (Vec3(1,1,1)*(1.0 - t) + Vec3(0.5,0.7,1.0)*t)*Vec3(0.15, 0.15, 0.15)
+        (Vec3(1,1,1)*(1.0 - t) + Vec3(0.5,0.7,1.0)*t)//*Vec3(0.15, 0.15, 0.15)
       }
     }
   }

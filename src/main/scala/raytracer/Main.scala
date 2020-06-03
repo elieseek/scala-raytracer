@@ -23,13 +23,14 @@ object Main extends App {
   val aspectRatio = 16.0 / 9.0
   val imageWidth = 384
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 128
+  val samplesPerPixel = 32
   val maxDepth = 50
   val numThreads = 4
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
   //var world = Scene.randomScene()
-  var world = Scene.staticScene()
+  //var world = BvhNode(Scene.twoSpheres(), 0, 0)
+  var world = Scene.earth()
 
   // Set up camera
   val lookFrom = Vec3(13,4,3)
@@ -52,7 +53,8 @@ object Main extends App {
 object Scene {
   def randomScene() = {
     var world = HittableList(ArrayBuffer[Hittable]())
-    val groundMaterial = Lambertian(Vec3(0.5, 0.5, 0.5))
+    val checker = CheckerTexture(SolidColour(0.2, 0.3, 0.1), SolidColour(0.9, 0.9, 0.9))
+    val groundMaterial = Lambertian(checker)
     world.add(Sphere(Vec3(0,-1000,0), 1000, groundMaterial))
 
     for (a <- -11 until 11) {
@@ -65,7 +67,7 @@ object Scene {
           if (chooseMat < 0.50) {
             // diffuse
             val albedo = randomVec3() * randomVec3()
-            val sphereMaterial = Lambertian(albedo)
+            val sphereMaterial = Lambertian(SolidColour(albedo))
             world.add(Sphere(centre, 0.2, sphereMaterial))
           } else if (chooseMat < 0.65) {
             // metal
@@ -95,7 +97,7 @@ object Scene {
     val material1 = Dialectric(1.5, Vec3(1, 1, 1))
     world.add(Sphere(Vec3(0, 1, 0), 1.0, material1))
     
-    val material2 = Lambertian(Vec3(0.4, 0.2, 0.1))
+    val material2 = Lambertian(SolidColour(0.4, 0.2, 0.1))
     world.add(Sphere(Vec3(-3, 1, 0), 1.0, material2))
 
     val material3 = Metal(Vec3(0.7, 0.6, 0.5), 0.0)
@@ -108,13 +110,13 @@ object Scene {
 
   def staticScene() = {
     var world = HittableList(ArrayBuffer[Hittable]())
-    val groundMaterial = Lambertian(Vec3(0.5, 0.5, 0.5))
+    val groundMaterial = Lambertian(SolidColour(0.5, 0.5, 0.5))
     world.add(Sphere(Vec3(0,-1000,0), 1000, groundMaterial))
     
     val material1 = Dialectric(1.5, Vec3(0, 0, 0))
     world.add(Sphere(Vec3(4, 1, 0), 1.0, material1))
     
-    val material2 = Lambertian(Vec3(0.4, 0.2, 0.1))
+    val material2 = Lambertian(SolidColour(0.4, 0.2, 0.1))
     world.add(Sphere(Vec3(-3, 1, 0), 1.0, material2))
 
     val material3 = Metal(Vec3(0.7, 0.6, 0.5), 0.0)
@@ -126,7 +128,7 @@ object Scene {
 
     world.add(Sphere(Vec3(1.6, 0.4, 2), 0.4, Metal(Vec3(0.7, 0.6, 0.5), 0.4)))
 
-    world.add(Sphere(Vec3(-2, 0.4, 2), 0.4, Lambertian(Vec3(0.95, 0.35, 0.95))))
+    world.add(Sphere(Vec3(-2, 0.4, 2), 0.4, Lambertian(SolidColour(0.95, 0.35, 0.95))))
 
     world.add(Sphere(Vec3(3.7, 0.4, 3), 0.4, Dialectric(1.5, Vec3(0.05, 0.05, 0.05))))
     world.add(Sphere(Vec3(3.7, 0.4, 3), -0.35, Dialectric(1.5, Vec3(0.05, 0.05, 0.05))))
@@ -134,5 +136,21 @@ object Scene {
     world.add(Sphere(Vec3(-30, 200, -200), 100.0, Light(Vec3(1.0, 1.0, 1.0), 10)))
 
     world
+  }
+
+  def twoSpheres() = {
+    var world = HittableList(ArrayBuffer[Hittable]())
+    val perText = NoiseTexture(4)
+    world.add(Sphere(Vec3(0, -1000, 0), 1000, Lambertian(perText)))
+    world.add(Sphere(Vec3(0, 2, 0), 2, Lambertian(perText)))
+
+    world
+  }
+
+  def earth() = {
+    val earthTexture = ImageTexture("/earthmap.jpg")
+    val earthSurface = Lambertian(earthTexture)
+    val globe = ArrayBuffer[Hittable](Sphere(Vec3(0,0,0), 2, earthSurface))
+    HittableList(globe)
   }
 }

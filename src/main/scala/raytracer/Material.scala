@@ -10,10 +10,10 @@ trait Material {
   def scatter(rIn: Ray, rec: HitRecord): Option[Scatter]
 }
 
-case class Lambertian(albedo: Vec3) extends Material {
+case class Lambertian(albedo: Texture) extends Material {
   def scatter(rIn: Ray, rec: HitRecord): Option[Scatter] = {
     val scatterDirection = rec.normal + randomUnitVector()
-    val attenuation = albedo
+    val attenuation = albedo.value(rec.u, rec.v, rec.p)
     Some(Scatter(Ray(rec.p, scatterDirection, rIn.time), attenuation))
   }
 }

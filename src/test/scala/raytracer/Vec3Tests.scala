@@ -49,6 +49,10 @@ class Vec3Tests extends FunSpec {
       val v = Vec3(5, 0, 0)
       assert(normalise(v) == Vec3(1, 0, 0))
     }
+    it("gets variables by index") {
+      val v = Vec3(1, 2, 3)
+      assert(v(1) == 2)
+    }
   }
   describe("Vec3 utilities") {
     it("generates random unit vectors") {
