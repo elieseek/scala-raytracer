@@ -29,7 +29,8 @@ object Main extends App {
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
   //var world = Scene.randomScene()
-  var world = BvhNode(Scene.twoSpheres(), 0, 0)
+  //var world = BvhNode(Scene.twoSpheres(), 0, 0)
+  var world = Scene.earth()
 
   // Set up camera
   val lookFrom = Vec3(13,4,3)
@@ -144,5 +145,12 @@ object Scene {
     world.add(Sphere(Vec3(0, 2, 0), 2, Lambertian(perText)))
 
     world
+  }
+
+  def earth() = {
+    val earthTexture = ImageTexture("/earthmap.jpg")
+    val earthSurface = Lambertian(earthTexture)
+    val globe = ArrayBuffer[Hittable](Sphere(Vec3(0,0,0), 2, earthSurface))
+    HittableList(globe)
   }
 }
