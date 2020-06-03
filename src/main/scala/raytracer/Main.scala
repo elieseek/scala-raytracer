@@ -21,10 +21,10 @@ import Camera._
 
 object Main extends App {
   val aspectRatio = 16.0 / 9.0
-  val imageWidth = 1920
+  val imageWidth = 384
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 2048
-  val maxDepth = 100
+  val samplesPerPixel = 128
+  val maxDepth = 50
   val numThreads = 4
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
@@ -37,7 +37,7 @@ object Main extends App {
   val vUp = Vec3(0,1,0)
   val distToFocus = 10.0
   val aperture = 0// 0.1
-  val cam = Camera(lookFrom, lookAt, vUp, 20, aspectRatio, aperture, distToFocus)
+  val cam = Camera(lookFrom, lookAt, vUp, 20, aspectRatio, aperture, distToFocus, 0.0, 1.0)
   
   val futures = (0 until numThreads).map { 
     x => Future {
@@ -111,16 +111,16 @@ object Scene {
     val groundMaterial = Lambertian(Vec3(0.5, 0.5, 0.5))
     world.add(Sphere(Vec3(0,-1000,0), 1000, groundMaterial))
     
-    val material1 = Dialectric(1.5, Vec3(1, 1, 1))
+    val material1 = Dialectric(1.5, Vec3(0, 0, 0))
     world.add(Sphere(Vec3(4, 1, 0), 1.0, material1))
     
     val material2 = Lambertian(Vec3(0.4, 0.2, 0.1))
     world.add(Sphere(Vec3(-3, 1, 0), 1.0, material2))
 
-    val material3 = Metal(Vec3(0.7, 0.6, 0.5), 0.05)
+    val material3 = Metal(Vec3(0.7, 0.6, 0.5), 0.0)
     world.add(Sphere(Vec3(0, 1, 0), 1.0, material3))
 
-    world.add(Sphere(Vec3(4.4, 0.4, 2), 0.4, Dialectric(1.5, Vec3(0.95, 0.2, 0.75))))
+    world.add(MovingSphere(Vec3(4.4, 0.4, 2), Vec3(4.4, 0.7, 2), 0, 1, 0.4, Dialectric(1.5, Vec3(0.95, 0.2, 0.75))))
 
     world.add(Sphere(Vec3(0, 0.4, 3), 0.4, Dialectric(1.5, Vec3(0.2, 1, 1))))
 
@@ -128,8 +128,8 @@ object Scene {
 
     world.add(Sphere(Vec3(-2, 0.4, 2), 0.4, Lambertian(Vec3(0.95, 0.35, 0.95))))
 
-    world.add(Sphere(Vec3(3.7, 0.4, 3), 0.4, Dialectric(1.5, Vec3(1, 1, 1))))
-    world.add(Sphere(Vec3(3.7, 0.4, 3), -0.35, Dialectric(1.5, Vec3(1, 1, 1))))
+    world.add(Sphere(Vec3(3.7, 0.4, 3), 0.4, Dialectric(1.5, Vec3(0.05, 0.05, 0.05))))
+    world.add(Sphere(Vec3(3.7, 0.4, 3), -0.35, Dialectric(1.5, Vec3(0.05, 0.05, 0.05))))
 
     world.add(Sphere(Vec3(-30, 200, -200), 100.0, Light(Vec3(1.0, 1.0, 1.0), 10)))
 
