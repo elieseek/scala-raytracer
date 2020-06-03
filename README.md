@@ -1,3 +1,4 @@
+![Scala CI](https://github.com/elieseek/scala-raytracer/workflows/Scala%20CI/badge.svg)
 # scala-raytracer
 Learning scala by trying to create a raytracer using [this guide](https://raytracing.github.io/books/RayTracingInOneWeekend.html#overview)
 # Result
