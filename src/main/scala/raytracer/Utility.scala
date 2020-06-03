@@ -5,6 +5,7 @@ import scala.util.Random
 
 object Utility {
   val rand = new Random()
+  val seededRand = new Random(42) // some rng elements need to be static when multithreaded (e.g. bvh)
   def degreesToRadians(deg: Double) = {
     deg * Pi / 180
   }
@@ -22,4 +23,6 @@ object Utility {
       x
     }
   }
+
+  def randomInt(i: Int) = seededRand.nextInt(i+1)
 }

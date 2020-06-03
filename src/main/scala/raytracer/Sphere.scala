@@ -42,4 +42,12 @@ case class Sphere(centre: Vec3, radius: Double, material: Material) extends Hitt
       None
     }
   }
+
+  def boundingBox(t0: Double, t1: Double) = {
+    val outputBB = AABB(
+      centre - Vec3(radius, radius, radius),
+      centre + Vec3(radius, radius, radius)
+    )
+    Some(outputBB)
+  }
 }

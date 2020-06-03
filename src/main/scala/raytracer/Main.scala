@@ -23,13 +23,13 @@ object Main extends App {
   val aspectRatio = 16.0 / 9.0
   val imageWidth = 384
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 128
+  val samplesPerPixel = 10
   val maxDepth = 50
-  val numThreads = 4
+  val numThreads = 1
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
   //var world = Scene.randomScene()
-  var world = Scene.staticScene()
+  var world = new BvhNode(Scene.randomScene(), 0, 1)
 
   // Set up camera
   val lookFrom = Vec3(13,4,3)
@@ -46,7 +46,7 @@ object Main extends App {
   }
   val aggFuture = Future.sequence(futures)
   val imageArray = averageImageArrays(Await.result(aggFuture, Duration.Inf), numThreads)
-  writeColourArray(imageArray)
+  //writeColourArray(imageArray)
 }
 
 object Scene {

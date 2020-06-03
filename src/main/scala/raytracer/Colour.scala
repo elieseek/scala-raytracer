@@ -52,7 +52,7 @@ object Colour {
     imageArray
   }
 
-  def calcImageArray(cam: Camera, world: HittableList, imageHeight: Int, imageWidth: Int, samplesPerPixel: Int, maxDepth: Int) = {
+  def calcImageArray(cam: Camera, world: Hittable, imageHeight: Int, imageWidth: Int, samplesPerPixel: Int, maxDepth: Int) = {
     val imageArray = new ArrayBuffer[Vector[Int]]
     for (j <- imageHeight-1 to 0 by -1) {
       System.err.print(s"\rScanlines remaining: $j")
