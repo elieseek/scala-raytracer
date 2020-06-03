@@ -23,11 +23,9 @@ object Main extends App {
   val aspectRatio = 16.0 / 9.0
   val imageWidth = 1920
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 512
+  val samplesPerPixel = 2048
   val maxDepth = 100
-  val numThreads = 16
-
-  implicit val ex = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(512))
+  val numThreads = 4
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
   //var world = Scene.randomScene()

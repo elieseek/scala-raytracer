@@ -76,15 +76,13 @@ object Colour {
     } else {
       world.hit(r, 0.001, PositiveInfinity) match {
       case Some(newRecord: HitRecord) => 
-        newRecord.mat match {
-          case light: Light => newRecord.mat.scatter(r, newRecord) match {
-            case Some(scatter) => scatter.attenuation
+        newRecord.mat match{
+          case l: Light => l.scatter(r, newRecord) match {
+            case Some(scatter: Scatter) => scatter.attenuation
             case None => Vec3(0, 0, 0)
           }
-          case material: Material =>
-            material.scatter(r, newRecord) match {
-            case Some(scatter: Scatter) => 
-              rayColour(scatter.scattered, world, depth-1) * scatter.attenuation
+          case m: Material => m.scatter(r, newRecord) match {
+            case Some(scatter: Scatter) => rayColour(scatter.scattered, world, depth-1) * scatter.attenuation
             case None => Vec3(0,0,0)
           }
         }

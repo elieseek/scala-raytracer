@@ -11,7 +11,7 @@ trait Material {
 }
 
 case class Lambertian(albedo: Vec3) extends Material {
-  def scatter(rIn: Ray, rec: HitRecord) = {
+  def scatter(rIn: Ray, rec: HitRecord): Option[Scatter] = {
     val scatterDirection = rec.normal + randomUnitVector()
     val attenuation = albedo
     Some(Scatter(Ray(rec.p, scatterDirection), attenuation))
@@ -19,7 +19,7 @@ case class Lambertian(albedo: Vec3) extends Material {
 }
 
 case class Metal(albedo: Vec3, fuzz: Double) extends Material {
-  def scatter(rIn: Ray, rec: HitRecord) = {
+  def scatter(rIn: Ray, rec: HitRecord): Option[Scatter] = {
     val f = clamp(fuzz, 0,1)
     val reflected = reflectVec3(normalise(rIn.direction()), rec.normal)
     val scattered = Ray(rec.p, reflected + randomInUnitSphere()*f)
@@ -33,7 +33,7 @@ case class Metal(albedo: Vec3, fuzz: Double) extends Material {
 }
 
 case class Dialectric(refIndex: Double, albedo: Vec3, opacity: Double) extends Material {
-  def scatter(rIn: Ray, rec: HitRecord) = {
+  def scatter(rIn: Ray, rec: HitRecord): Option[Scatter] = {
     val etaiOverEtat = if (rec.frontFace) 1.0 / refIndex else refIndex
     val unitDirection = normalise(rIn.direction())
     val cosTheta = clamp(dot(unitDirection*(-1),rec.normal), -1, 1)
@@ -58,7 +58,7 @@ case class Dialectric(refIndex: Double, albedo: Vec3, opacity: Double) extends M
 }
 
 case class Light(colour: Vec3, intensity: Double) extends Material {
-  def scatter(rIn: Ray, rec: HitRecord) = {
+  def scatter(rIn: Ray, rec: HitRecord): Option[Scatter] = {
     Some(Scatter(rIn, colour*intensity))
   }
 }
