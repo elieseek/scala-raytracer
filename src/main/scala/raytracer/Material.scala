@@ -32,7 +32,7 @@ case class Metal(albedo: Vec3, fuzz: Double) extends Material {
   }
 }
 
-case class Dialectric(refIndex: Double, albedo: Vec3, opacity: Double) extends Material {
+case class Dialectric(refIndex: Double, albedo: Vec3) extends Material {
   def scatter(rIn: Ray, rec: HitRecord): Option[Scatter] = {
     val etaiOverEtat = if (rec.frontFace) 1.0 / refIndex else refIndex
     val unitDirection = normalise(rIn.direction())
@@ -51,7 +51,7 @@ case class Dialectric(refIndex: Double, albedo: Vec3, opacity: Double) extends M
         case Some(i: HitRecord) => (i.p - rec.p).length()
         case None => 0
       }
-      val attenuation = clampVec3(Vec3(1,1,1) - albedo*mediumTraveled*opacity, 0, 1)
+      val attenuation = clampVec3(Vec3(1,1,1) - albedo*mediumTraveled, 0, 1)
       Some(Scatter(Ray(rec.p, refracted, rIn.time), attenuation))
     }
   }
