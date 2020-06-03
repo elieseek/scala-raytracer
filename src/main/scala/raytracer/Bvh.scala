@@ -5,7 +5,6 @@ import Utility._
 import AABBUtility._
 
 class BvhNode(objects: ArrayBuffer[Hittable], start: Int, end: Int, time0: Double, time1: Double) extends Hittable {
-  def this(list: HittableList, time0: Double, time1: Double) = this(list.objects, 0, list.objects.length, time0, time1)
   var box: AABB = _
   var left: Hittable = _
   var right: Hittable = _
@@ -70,4 +69,10 @@ class BvhNode(objects: ArrayBuffer[Hittable], start: Int, end: Int, time0: Doubl
   def boxXCompare(a: Hittable, b: Hittable): Boolean = boxCompare(a, b, 0)
   def boxYCompare(a: Hittable, b: Hittable): Boolean = boxCompare(a, b, 1)
   def boxZCompare(a: Hittable, b: Hittable): Boolean = boxCompare(a, b, 2)
+}
+
+object BvhNode {
+  def apply(list: HittableList, time0: Double, time1: Double) = new BvhNode(list.objects, 0, list.objects.length, time0, time1)
+
+  def apply(objects: ArrayBuffer[Hittable], start: Int, end: Int, time0: Double, time1: Double) = new BvhNode(objects: ArrayBuffer[Hittable], start: Int, end: Int, time0: Double, time1: Double)
 }

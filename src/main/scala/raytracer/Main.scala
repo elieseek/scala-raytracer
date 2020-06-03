@@ -23,13 +23,13 @@ object Main extends App {
   val aspectRatio = 16.0 / 9.0
   val imageWidth = 384
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 10
+  val samplesPerPixel = 32
   val maxDepth = 50
-  val numThreads = 1
+  val numThreads = 4
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
   //var world = Scene.randomScene()
-  var world = new BvhNode(Scene.randomScene(), 0, 1)
+  var world = BvhNode(Scene.randomScene(), 0, 1)
 
   // Set up camera
   val lookFrom = Vec3(13,4,3)
@@ -52,7 +52,8 @@ object Main extends App {
 object Scene {
   def randomScene() = {
     var world = HittableList(ArrayBuffer[Hittable]())
-    val groundMaterial = Lambertian(SolidColour(0.5, 0.5, 0.5))
+    val checker = CheckerTexture(SolidColour(0.2, 0.3, 0.1), SolidColour(0.9, 0.9, 0.9))
+    val groundMaterial = Lambertian(checker)
     world.add(Sphere(Vec3(0,-1000,0), 1000, groundMaterial))
 
     for (a <- -11 until 11) {
