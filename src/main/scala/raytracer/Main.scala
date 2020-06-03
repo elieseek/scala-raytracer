@@ -46,13 +46,13 @@ object Main extends App {
   }
   val aggFuture = Future.sequence(futures)
   val imageArray = averageImageArrays(Await.result(aggFuture, Duration.Inf), numThreads)
-  //writeColourArray(imageArray)
+  writeColourArray(imageArray)
 }
 
 object Scene {
   def randomScene() = {
     var world = HittableList(ArrayBuffer[Hittable]())
-    val groundMaterial = Lambertian(Vec3(0.5, 0.5, 0.5))
+    val groundMaterial = Lambertian(SolidColour(0.5, 0.5, 0.5))
     world.add(Sphere(Vec3(0,-1000,0), 1000, groundMaterial))
 
     for (a <- -11 until 11) {
@@ -65,7 +65,7 @@ object Scene {
           if (chooseMat < 0.50) {
             // diffuse
             val albedo = randomVec3() * randomVec3()
-            val sphereMaterial = Lambertian(albedo)
+            val sphereMaterial = Lambertian(SolidColour(albedo))
             world.add(Sphere(centre, 0.2, sphereMaterial))
           } else if (chooseMat < 0.65) {
             // metal
@@ -95,7 +95,7 @@ object Scene {
     val material1 = Dialectric(1.5, Vec3(1, 1, 1))
     world.add(Sphere(Vec3(0, 1, 0), 1.0, material1))
     
-    val material2 = Lambertian(Vec3(0.4, 0.2, 0.1))
+    val material2 = Lambertian(SolidColour(0.4, 0.2, 0.1))
     world.add(Sphere(Vec3(-3, 1, 0), 1.0, material2))
 
     val material3 = Metal(Vec3(0.7, 0.6, 0.5), 0.0)
@@ -108,13 +108,13 @@ object Scene {
 
   def staticScene() = {
     var world = HittableList(ArrayBuffer[Hittable]())
-    val groundMaterial = Lambertian(Vec3(0.5, 0.5, 0.5))
+    val groundMaterial = Lambertian(SolidColour(0.5, 0.5, 0.5))
     world.add(Sphere(Vec3(0,-1000,0), 1000, groundMaterial))
     
     val material1 = Dialectric(1.5, Vec3(0, 0, 0))
     world.add(Sphere(Vec3(4, 1, 0), 1.0, material1))
     
-    val material2 = Lambertian(Vec3(0.4, 0.2, 0.1))
+    val material2 = Lambertian(SolidColour(0.4, 0.2, 0.1))
     world.add(Sphere(Vec3(-3, 1, 0), 1.0, material2))
 
     val material3 = Metal(Vec3(0.7, 0.6, 0.5), 0.0)
@@ -126,7 +126,7 @@ object Scene {
 
     world.add(Sphere(Vec3(1.6, 0.4, 2), 0.4, Metal(Vec3(0.7, 0.6, 0.5), 0.4)))
 
-    world.add(Sphere(Vec3(-2, 0.4, 2), 0.4, Lambertian(Vec3(0.95, 0.35, 0.95))))
+    world.add(Sphere(Vec3(-2, 0.4, 2), 0.4, Lambertian(SolidColour(0.95, 0.35, 0.95))))
 
     world.add(Sphere(Vec3(3.7, 0.4, 3), 0.4, Dialectric(1.5, Vec3(0.05, 0.05, 0.05))))
     world.add(Sphere(Vec3(3.7, 0.4, 3), -0.35, Dialectric(1.5, Vec3(0.05, 0.05, 0.05))))

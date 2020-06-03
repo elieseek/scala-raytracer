@@ -9,7 +9,7 @@ case class HittableList(objects: ArrayBuffer[Hittable]) extends Hittable {
   def add(obj: Hittable) = objects.append(obj)
 
   def hit(r: Ray, tMin: Double, tMax: Double): Option[HitRecord] = {
-    var tempRec = HitRecord(Vec3(0,0,0), Vec3(0,0,0), Lambertian(Vec3(0,0,0)), 0.0, false, Sphere(Vec3(0,0,0), 0.0, Lambertian(Vec3(0,0,0))))
+    var tempRec = HitRecord(Vec3(0,0,0), Vec3(0,0,0), Lambertian(SolidColour(0,0,0)), 0.0, 0.0, 0.0, false, Sphere(Vec3(0,0,0), 0.0, Lambertian(SolidColour(0,0,0))))
     var hitAnything = false
     var closestSoFar = tMax
     for (obj <- objects) {

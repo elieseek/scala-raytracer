@@ -8,7 +8,7 @@ case class MovingSphere(centre0: Vec3, centre1: Vec3, time0: Double, time1: Doub
   def centre(time: Double) = centre0 + (centre1 - centre0) * ((time - time0) / (time1 - time0))
 
   def hit(r: Ray, tMin: Double, tMax: Double) = {
-    var rec: HitRecord = HitRecord(Vec3(0,0,0), Vec3(0,0,0), Lambertian(Vec3(0,0,0)), 0.0, false, Sphere(Vec3(0,0,0), 0.0, Lambertian(Vec3(0,0,0))))
+    var rec = HitRecord(Vec3(0,0,0), Vec3(0,0,0), Lambertian(SolidColour(0,0,0)), 0.0, 0.0, 0.0, false, Sphere(Vec3(0,0,0), 0.0, Lambertian(SolidColour(0,0,0))))
     val oc = r.origin - centre(r.time)
     val a = r.direction.lengthSquared
     val halfB = dot(oc, r.direction)
