@@ -17,6 +17,12 @@ case class Vec3(var x: Double, var y: Double, var z: Double) {
 
   def /(t: Double) = Vec3(this.x / t, this.y / t, this.z / t)
 
+  def apply(i: Int) = i match {
+    case 0 => this.x
+    case 1 => this.y
+    case 2 => this.z
+  }
+
   def length(): Double = sqrt(lengthSquared())
 
   def lengthSquared(): Double = x*x + y*y + z*z
