@@ -1,6 +1,7 @@
 # scala-raytracer
 Learning scala by trying to create a raytracer using [this guide](https://raytracing.github.io/books/RayTracingInOneWeekend.html#overview)
 # Result
+![with lighting](https://github.com/elieseek/scala-raytracer/blob/master/result/lighting%201920.png)
 ![final product](https://github.com/elieseek/scala-raytracer/blob/master/result/final.png)
 
 # Changes to guide
