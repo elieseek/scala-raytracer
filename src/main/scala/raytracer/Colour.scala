@@ -89,7 +89,7 @@ object Colour {
       case None =>
         val unitDirection = normalise(r.direction)
         val t = (unitDirection.y + 1) * 0.5
-        (Vec3(1,1,1)*(1.0 - t) + Vec3(0.5,0.7,1.0)*t)*Vec3(0.15, 0.15, 0.15)
+        (Vec3(1,1,1)*(1.0 - t) + Vec3(0.5,0.7,1.0)*t)//*Vec3(0.15, 0.15, 0.15)
       }
     }
   }

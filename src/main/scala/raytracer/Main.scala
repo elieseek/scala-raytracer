@@ -29,7 +29,7 @@ object Main extends App {
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
   //var world = Scene.randomScene()
-  var world = BvhNode(Scene.randomScene(), 0, 1)
+  var world = BvhNode(Scene.twoSpheres(), 0, 0)
 
   // Set up camera
   val lookFrom = Vec3(13,4,3)
@@ -133,6 +133,15 @@ object Scene {
     world.add(Sphere(Vec3(3.7, 0.4, 3), -0.35, Dialectric(1.5, Vec3(0.05, 0.05, 0.05))))
 
     world.add(Sphere(Vec3(-30, 200, -200), 100.0, Light(Vec3(1.0, 1.0, 1.0), 10)))
+
+    world
+  }
+
+  def twoSpheres() = {
+    var world = HittableList(ArrayBuffer[Hittable]())
+    val perText = NoiseTexture(4)
+    world.add(Sphere(Vec3(0, -1000, 0), 1000, Lambertian(perText)))
+    world.add(Sphere(Vec3(0, 2, 0), 2, Lambertian(perText)))
 
     world
   }
