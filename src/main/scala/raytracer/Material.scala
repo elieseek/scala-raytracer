@@ -14,7 +14,7 @@ case class Lambertian(albedo: Vec3) extends Material {
   def scatter(rIn: Ray, rec: HitRecord): Option[Scatter] = {
     val scatterDirection = rec.normal + randomUnitVector()
     val attenuation = albedo
-    Some(Scatter(Ray(rec.p, scatterDirection), attenuation))
+    Some(Scatter(Ray(rec.p, scatterDirection, rIn.time), attenuation))
   }
 }
 
@@ -22,7 +22,7 @@ case class Metal(albedo: Vec3, fuzz: Double) extends Material {
   def scatter(rIn: Ray, rec: HitRecord): Option[Scatter] = {
     val f = clamp(fuzz, 0,1)
     val reflected = reflectVec3(normalise(rIn.direction()), rec.normal)
-    val scattered = Ray(rec.p, reflected + randomInUnitSphere()*f)
+    val scattered = Ray(rec.p, reflected + randomInUnitSphere()*f, rIn.time)
     val attenuation = albedo
     if (dot(scattered.direction, rec.normal) > 0) {
       Some(Scatter(scattered, attenuation))
@@ -32,7 +32,7 @@ case class Metal(albedo: Vec3, fuzz: Double) extends Material {
   }
 }
 
-case class Dialectric(refIndex: Double, albedo: Vec3, opacity: Double) extends Material {
+case class Dialectric(refIndex: Double, albedo: Vec3) extends Material {
   def scatter(rIn: Ray, rec: HitRecord): Option[Scatter] = {
     val etaiOverEtat = if (rec.frontFace) 1.0 / refIndex else refIndex
     val unitDirection = normalise(rIn.direction())
@@ -42,17 +42,17 @@ case class Dialectric(refIndex: Double, albedo: Vec3, opacity: Double) extends M
     if  ((etaiOverEtat * sinTheta > 1.0) || 
         (randomDouble() < MaterialUtility.schlick(cosTheta, etaiOverEtat))) {
       val reflected = reflectVec3(unitDirection, rec.normal)
-      Some(Scatter(Ray(rec.p, reflected), Vec3(1,1,1)))
+      Some(Scatter(Ray(rec.p, reflected, rIn.time), Vec3(1,1,1)))
     } else {
       val refracted = refractVec3(unitDirection, rec.normal, etaiOverEtat)
       val interiorDir = if (rec.frontFace) refracted else refracted * (-1)
-      val interiorRay = Ray(rec.p, interiorDir)
+      val interiorRay = Ray(rec.p, interiorDir, rIn.time)
       val mediumTraveled = rec.obj.hit(interiorRay, 0.00001, PositiveInfinity) match {
         case Some(i: HitRecord) => (i.p - rec.p).length()
         case None => 0
       }
-      val attenuation = clampVec3(Vec3(1,1,1) - albedo*mediumTraveled*opacity, 0, 1)
-      Some(Scatter(Ray(rec.p, refracted), attenuation))
+      val attenuation = clampVec3(Vec3(1,1,1) - albedo*mediumTraveled, 0, 1)
+      Some(Scatter(Ray(rec.p, refracted, rIn.time), attenuation))
     }
   }
 }

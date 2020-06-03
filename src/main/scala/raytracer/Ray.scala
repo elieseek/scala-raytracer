@@ -1,9 +1,11 @@
 package raytracer
 
-case class Ray(orig: Vec3, dir: Vec3) {
+case class Ray(orig: Vec3, dir: Vec3, tm: Double = 0.0) {
   def origin() = orig
   
   def direction() = dir
+
+  def time() = tm
 
   def at(t: Double) = orig + dir*t
 
