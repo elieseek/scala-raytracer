@@ -3,6 +3,7 @@ package raytracer
 import scala.Double.PositiveInfinity
 import scala.math.sqrt
 import scala.math.pow
+
 import Vec3Utility._
 import Utility._
 

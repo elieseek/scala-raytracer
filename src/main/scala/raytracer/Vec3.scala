@@ -4,6 +4,7 @@ import scala.math.sqrt
 import scala.math.Pi
 import scala.math.sin
 import scala.math.cos
+
 import Utility._
 
 case class Vec3(var x: Double, var y: Double, var z: Double) {

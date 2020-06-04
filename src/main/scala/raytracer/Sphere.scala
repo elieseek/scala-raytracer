@@ -4,6 +4,7 @@ import scala.math.sqrt
 import scala.math.atan2
 import scala.math.asin
 import scala.math.Pi
+
 import Vec3Utility._
 
 case class Sphere(centre: Vec3, radius: Double, material: Material) extends Hittable {

@@ -3,6 +3,7 @@ package raytracer
 import scala.collection.mutable.ArrayBuffer
 import scala.math.floor
 import scala.math.abs
+
 import Utility._
 import Vec3Utility._
 
