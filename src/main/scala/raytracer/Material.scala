@@ -33,7 +33,25 @@ case class Metal(albedo: Vec3, fuzz: Double) extends Material {
   }
 }
 
-case class Dialectric(refIndex: Double, albedo: Vec3) extends Material {
+case class Dialectric(refIndex: Double) extends Material {
+  def scatter(rIn: Ray, rec: HitRecord): Option[Scatter] = {
+    val etaiOverEtat = if (rec.frontFace) 1.0 / refIndex else refIndex
+    val unitDirection = normalise(rIn.direction())
+    val cosTheta = clamp(dot(unitDirection*(-1),rec.normal), -1, 1)
+    val sinTheta = sqrt(1.0 - cosTheta*cosTheta)
+    // account for total internal reflection
+    if  ((etaiOverEtat * sinTheta > 1.0) || 
+        (randomDouble() < MaterialUtility.schlick(cosTheta, etaiOverEtat))) {
+      val reflected = reflectVec3(unitDirection, rec.normal)
+      Some(Scatter(Ray(rec.p, reflected, rIn.time), Vec3(1, 1, 1)))
+    } else {
+      val refracted = refractVec3(unitDirection, rec.normal, etaiOverEtat)
+      Some(Scatter(Ray(rec.p, refracted, rIn.time), Vec3(1, 1, 1)))
+    }
+  }
+}
+
+case class ColouredDialectric(refIndex: Double, albedo: Vec3) extends Material {
   def scatter(rIn: Ray, rec: HitRecord): Option[Scatter] = {
     val etaiOverEtat = if (rec.frontFace) 1.0 / refIndex else refIndex
     val unitDirection = normalise(rIn.direction())
