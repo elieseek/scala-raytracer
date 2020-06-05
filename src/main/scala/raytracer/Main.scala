@@ -10,44 +10,40 @@ import java.util.concurrent.Executors
 import scala.util.{Failure, Success}
 
 import scala.math.sqrt
-import Vec3._
 import Vec3Utility._
-import Colour._
-import Sphere._
-import HittableList._
-import Ray._
 import Utility._
-import Camera._
+
 
 object Main extends App {
-  val aspectRatio = 16.0 / 9.0
-  val imageWidth = 384
+  val aspectRatio = 1.0 / 1.0 //16.0 / 9.0
+  val imageWidth = 300
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 32
+  val samplesPerPixel = 128
   val maxDepth = 50
   val numThreads = 4
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
   //var world = Scene.randomScene()
   //var world = BvhNode(Scene.twoSpheres(), 0, 0)
-  var world = Scene.earth()
+  var world = BvhNode(Scene.cornellBox(), 0, 0)
 
   // Set up camera
-  val lookFrom = Vec3(13,4,3)
-  val lookAt = Vec3(0,0,0)
+  val lookFrom = Vec3(278,278,-800)
+  val lookAt = Vec3(278,278,0)
   val vUp = Vec3(0,1,0)
   val distToFocus = 10.0
   val aperture = 0// 0.1
-  val cam = Camera(lookFrom, lookAt, vUp, 20, aspectRatio, aperture, distToFocus, 0.0, 1.0)
+  val fov = 40
+  val cam = Camera(lookFrom, lookAt, vUp, fov, aspectRatio, aperture, distToFocus, 0.0, 1.0)
   
   val futures = (0 until numThreads).map { 
     x => Future {
-      calcImageArray(cam, world, imageHeight, imageWidth, samplesPerPixel, maxDepth)
+      Colour.calcImageArray(cam, world, imageHeight, imageWidth, samplesPerPixel, maxDepth)
     }
   }
   val aggFuture = Future.sequence(futures)
-  val imageArray = averageImageArrays(Await.result(aggFuture, Duration.Inf), numThreads)
-  writeColourArray(imageArray)
+  val imageArray = Colour.averageImageArrays(Await.result(aggFuture, Duration.Inf), numThreads)
+  Colour.writeColourArray(imageArray)
 }
 
 object Scene {
@@ -144,6 +140,8 @@ object Scene {
     world.add(Sphere(Vec3(0, -1000, 0), 1000, Lambertian(perText)))
     world.add(Sphere(Vec3(0, 2, 0), 2, Lambertian(perText)))
 
+    val light = Light(Vec3(1, 1, 1), 4)
+    world.add(XYRect(3, 5, 1, 3, -2, light))
     world
   }
 
@@ -152,5 +150,31 @@ object Scene {
     val earthSurface = Lambertian(earthTexture)
     val globe = ArrayBuffer[Hittable](Sphere(Vec3(0,0,0), 2, earthSurface))
     HittableList(globe)
+  }
+
+  def cornellBox() = {
+    var world = HittableList(ArrayBuffer[Hittable]())
+    val red = Lambertian(SolidColour(0.65, 0.05, 0.05))
+    val white = Lambertian(SolidColour(0.73, 0.73, 0.73))
+    val green = Lambertian(SolidColour(0.12, 0.45, 0.15))
+    val light = Light(Vec3(1, 1, 1), 15)
+
+    world.add(FlipFace(YZRect(0, 555, 0, 555, 555, green)))
+    world.add(YZRect(0, 555, 0, 555, 0, red))
+    world.add(XZRect(213, 343, 227, 332, 554, light))
+    world.add(XZRect(0, 555, 0, 555, 0, white))
+    world.add(FlipFace(XZRect(0, 555, 0, 555, 555, white)))
+    world.add(FlipFace(XYRect(0, 555, 0, 555, 555, white)))
+    var box1: Hittable = Box(Vec3(0, 0, 0), Vec3(165, 330, 165), white)
+    box1 = RotateY(box1, 15)
+    box1 = Translate(box1, Vec3(265, 0, 295))
+    world.add(box1)
+    
+    var box2: Hittable = Box(Vec3(0, 0, 0), Vec3(165, 165, 165), white)
+    box2 = RotateY(box2, -18)
+    box2 = Translate(box2, Vec3(130, 0, 65))
+    world.add(box2)
+
+    world
   }
 }

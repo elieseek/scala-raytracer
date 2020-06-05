@@ -47,3 +47,7 @@ case class HittableList(objects: ArrayBuffer[Hittable]) extends Hittable {
     }
   }
 }
+
+object HittableList {
+  def apply() = new HittableList(ArrayBuffer[Hittable]())
+}
