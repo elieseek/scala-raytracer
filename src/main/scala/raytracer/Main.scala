@@ -15,11 +15,11 @@ import Utility._
 
 
 object Main extends App {
-  val aspectRatio = 1.0 / 1.0 //16.0 / 9.0
+  val aspectRatio = 1.0 / 1.0
   val imageWidth = 200
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 1
-  val maxDepth = 1
+  val samplesPerPixel = 32
+  val maxDepth = 50
   val numThreads = 4
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
@@ -31,7 +31,7 @@ object Main extends App {
   val lookFrom = Vec3(475,278,-675)
   val lookAt = Vec3(278,278,0)
   val vUp = Vec3(0,1,0)
-  val distToFocus = 10.0
+  val distToFocus = (lookFrom-lookAt).length
   val aperture = 0.1
   val fov = 40
   val cam = Camera(lookFrom, lookAt, vUp, fov, aspectRatio, aperture, distToFocus, 0.0, 1.0)
