@@ -18,14 +18,13 @@ object Main extends App {
   val aspectRatio = 1.0 / 1.0
   val imageWidth = 200
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 32
+  val samplesPerPixel = 48
   val maxDepth = 50
   val numThreads = 4
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
-  //var world = Scene.randomScene()
-  //var world = BvhNode(Scene.twoSpheres(), 0, 0)
-  var world = Scene.randomSmoke()
+
+  var world = Scene.smokeBall()
 
   // Set up camera
   val lookFrom = Vec3(475,278,-675)

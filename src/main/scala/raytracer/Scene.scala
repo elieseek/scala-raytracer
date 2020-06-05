@@ -222,4 +222,17 @@ object Scene {
   
     world
   }
+
+  def smokeBall() = {
+    var world = HittableList()
+
+    val light = Light(Vec3(1, 1, 1), 10)
+    world.add(Sphere(Vec3(325,278,100), 150, light))
+    
+    var boundary = Sphere(Vec3(278,278,0), 150, Dialectric(1.5))
+    world.add(boundary)
+    world.add(ConstantMedium(boundary, 0.2, NoiseTexture(0.4)))
+
+    world
+  }
 }
