@@ -9,7 +9,7 @@ case class HittableList(objects: ArrayBuffer[Hittable]) extends Hittable {
   def add(obj: Hittable) = objects.append(obj)
 
   def hit(r: Ray, tMin: Double, tMax: Double): Option[HitRecord] = {
-    var tempRec = HitRecord(Vec3(0,0,0), Vec3(0,0,0), Lambertian(SolidColour(0,0,0)), 0.0, 0.0, 0.0, false, Sphere(Vec3(0,0,0), 0.0, Lambertian(SolidColour(0,0,0))))
+    var tempRec = HitRecord()
     var hitAnything = false
     var closestSoFar = tMax
     for (obj <- objects) {
@@ -46,4 +46,8 @@ case class HittableList(objects: ArrayBuffer[Hittable]) extends Hittable {
       
     }
   }
+}
+
+object HittableList {
+  def apply() = new HittableList(ArrayBuffer[Hittable]())
 }

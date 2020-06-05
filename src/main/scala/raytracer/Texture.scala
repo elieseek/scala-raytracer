@@ -8,8 +8,8 @@ import java.io.File
 import scala.io.Source
 import scala.collection.mutable.ArrayBuffer
 import scala.math.sin
+
 import Utility._
-import Perlin._
 
 trait Texture {
   def value(u: Double, v: Double, p: Vec3): Vec3

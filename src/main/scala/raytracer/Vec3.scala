@@ -4,6 +4,7 @@ import scala.math.sqrt
 import scala.math.Pi
 import scala.math.sin
 import scala.math.cos
+
 import Utility._
 
 case class Vec3(var x: Double, var y: Double, var z: Double) {
@@ -21,6 +22,12 @@ case class Vec3(var x: Double, var y: Double, var z: Double) {
     case 0 => this.x
     case 1 => this.y
     case 2 => this.z
+  }
+
+  def update(i: Int, j: Double) = i match {
+    case 0 => this.x = j
+    case 1 => this.y = j
+    case 2 => this.z = j
   }
 
   def length(): Double = sqrt(lengthSquared())
