@@ -16,16 +16,16 @@ import Utility._
 
 object Main extends App {
   val aspectRatio = 1.0 / 1.0 //16.0 / 9.0
-  val imageWidth = 300
+  val imageWidth = 200
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 128
+  val samplesPerPixel = 256
   val maxDepth = 50
   val numThreads = 4
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
   //var world = Scene.randomScene()
   //var world = BvhNode(Scene.twoSpheres(), 0, 0)
-  var world = BvhNode(Scene.cornellBox(), 0, 0)
+  var world = BvhNode(Scene.cornellSmoke(), 0, 0)
 
   // Set up camera
   val lookFrom = Vec3(278,278,-800)
@@ -173,6 +173,35 @@ object Scene {
     var box2: Hittable = Box(Vec3(0, 0, 0), Vec3(165, 165, 165), white)
     box2 = RotateY(box2, -18)
     box2 = Translate(box2, Vec3(130, 0, 65))
+    world.add(box2)
+
+    world
+  }
+
+  def cornellSmoke() = {
+    var world = HittableList(ArrayBuffer[Hittable]())
+    val red = Lambertian(SolidColour(0.65, 0.05, 0.05))
+    val white = Lambertian(SolidColour(0.73, 0.73, 0.73))
+    val green = Lambertian(SolidColour(0.12, 0.45, 0.15))
+    val light = Light(Vec3(1, 1, 1), 7)
+
+    world.add(FlipFace(YZRect(0, 555, 0, 555, 555, green)))
+    world.add(YZRect(0, 555, 0, 555, 0, red))
+    world.add(XZRect(113, 443, 127, 432, 554, light))
+    world.add(XZRect(0, 555, 0, 555, 0, white))
+    world.add(FlipFace(XZRect(0, 555, 0, 555, 555, white)))
+    world.add(FlipFace(XYRect(0, 555, 0, 555, 555, white)))
+
+    var box1: Hittable = Box(Vec3(0, 0, 0), Vec3(165, 330, 165), white)
+    box1 = RotateY(box1, 15)
+    box1 = Translate(box1, Vec3(265, 0, 295))
+    box1 = ConstantMedium(box1, 0.01, NoiseTexture(Vec3(0, 0, 0)))
+    world.add(box1)
+    
+    var box2: Hittable = Box(Vec3(0, 0, 0), Vec3(165, 165, 165), white)
+    box2 = RotateY(box2, -18)
+    box2 = Translate(box2, Vec3(130, 0, 65))
+    box2 = ConstantMedium(box2, 0.01, SolidColour(Vec3(1, 1, 1)))
     world.add(box2)
 
     world

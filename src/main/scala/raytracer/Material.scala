@@ -64,6 +64,14 @@ case class Light(colour: Vec3, intensity: Double) extends Material {
   }
 }
 
+case class Isotropic(albedo: Texture) extends Material {
+  def scatter(rIn: Ray, rec: HitRecord) = {
+    val scattered = Ray(rec.p, randomInUnitSphere(), rIn.time)
+    val attenuation = albedo.value(rec.u, rec.v, rec.p)
+    Some(Scatter(scattered, attenuation))
+  }
+}
+
 object MaterialUtility {
   def schlick(cosine: Double, refIndex: Double) = {
     var r0 = (1-refIndex) / (1+refIndex)

@@ -30,6 +30,10 @@ case class HitRecord(var p: Vec3,
   }
 }
 
+object HitRecord {
+  def apply() = new HitRecord(Vec3(0,0,0), Vec3(0,0,0), Lambertian(SolidColour(0,0,0)), 0.0, 0.0, 0.0, false, Sphere(Vec3(0,0,0), 0.0, Lambertian(SolidColour(0,0,0))))
+}
+
 case class FlipFace(obj: Hittable) extends Hittable {
   def hit(r: Ray, tMin: Double, tMax: Double) = {
      obj.hit(r, tMin, tMax) match {
