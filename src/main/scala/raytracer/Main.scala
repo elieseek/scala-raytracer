@@ -16,11 +16,11 @@ import Utility._
 
 object Main extends App {
   val aspectRatio = 1.0 / 1.0
-  val imageWidth = 200
+  val imageWidth = 100
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 32
+  val samplesPerPixel = 16
   val maxDepth = 50
-  val numThreads = 4
+  val numThreads = 1
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
   //var world = Scene.randomScene()
