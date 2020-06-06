@@ -18,7 +18,7 @@ object Main extends App {
   val aspectRatio = 1.0 / 1.0
   val imageWidth = 1080
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 172
+  val samplesPerPixel = 125
   val maxDepth = 50
   val numThreads = 96
 
