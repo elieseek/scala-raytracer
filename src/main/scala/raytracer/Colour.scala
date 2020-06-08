@@ -8,6 +8,7 @@ import java.io.File
 import scala.math.sqrt
 import scala.Double.PositiveInfinity
 import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.Map
 
 import Utility._
 import Vec3Utility._
@@ -32,9 +33,9 @@ object Colour {
     g = sqrt(scale * g)
     b = sqrt(scale * b)
 
-    val ir = clamp((256 * clamp(r, 0.0, 0.999)), 0, 256).toInt
-    val ig = clamp((256 * clamp(g, 0.0, 0.999)), 0, 256).toInt
-    val ib = clamp((256 * clamp(b, 0.0, 0.999)), 0, 256).toInt
+    val ir = (256 * clamp(r, 0.0, 0.999)).toInt
+    val ig = (256 * clamp(g, 0.0, 0.999)).toInt
+    val ib = (256 * clamp(b, 0.0, 0.999)).toInt
     ArrayBuffer(ir, ig, ib)
   }
 
@@ -76,12 +77,38 @@ object Colour {
       for (i <- 0 until imageWidth) {
         var pixelColour = Vec3(0, 0, 0)
         for (s <- 0 until samplesPerPixel) {
-          var u = (i + randomDouble()) / (imageWidth-1).toDouble
-          val v = (j + randomDouble()) / (imageHeight-1).toDouble
+          var u = (i + (s+randomDouble())/samplesPerPixel) / (imageWidth-1).toDouble
+          val v = (j + (s+randomDouble())/samplesPerPixel) / (imageHeight-1).toDouble
           var r = cam.getRay(u, v)
           pixelColour += rayColour(r, world, maxDepth)
         }
         imageArray(i)(j) = aggregateColour(pixelColour, samplesPerPixel)
+      }
+    }
+    imageArray
+  }
+
+  def calcPartition(cam: Camera, world: Hittable, imageHeight: Int, imageWidth: Int, heightPartition: Array[Int], widthPartition: Array[Int], samplesPerPixel: Int, maxDepth: Int) = {
+    var pixelMap = Map[Tuple2[Int, Int], ArrayBuffer[Int]]()
+    for (i <- widthPartition) {
+      for (j <- heightPartition) {
+        var pixelColour = Vec3(0, 0, 0)
+        for (s <- 0 until samplesPerPixel) {
+          var u = (i + (s+randomDouble())/samplesPerPixel) / (imageWidth-1).toDouble
+          val v = (j + (s+randomDouble())/samplesPerPixel) / (imageHeight-1).toDouble
+          var r = cam.getRay(u, v)
+          pixelColour += rayColour(r, world, maxDepth)
+        }
+        pixelMap((i,j)) = aggregateColour(pixelColour, samplesPerPixel)
+      }
+    }
+    pixelMap
+  }
+  
+  def writePixelMaps(pixelMaps: ArrayBuffer[Map[Tuple2[Int, Int], ArrayBuffer[Int]]], imageArray: ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]]) = {
+    for (map <- pixelMaps) {
+      for ((k, rgb) <- map) {
+        imageArray(k._1)(k._2) = rgb
       }
     }
     imageArray
