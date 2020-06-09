@@ -16,10 +16,10 @@ import Utility._
 
 object Main extends App {
   val aspectRatio = 1.0 / 1.0
-  val imageWidth = 1280
+  val imageWidth = 100
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 4096
-  val maxDepth = 25
+  val samplesPerPixel = 64
+  val maxDepth = 50
   val partitionSize = 8 // # groups to split width/height into for multithreading (1 creates single-threaded)
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
