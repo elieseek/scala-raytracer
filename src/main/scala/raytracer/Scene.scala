@@ -167,58 +167,58 @@ object Scene {
   }
 
   def randomSmoke() = {
-    // val boxes1 = HittableList()
-    // val ground = Lambertian(SolidColour(0.48, 0.83, 0.53))
+    val boxes1 = HittableList()
+    val ground = Lambertian(SolidColour(0.48, 0.83, 0.53))
 
-    // val boxesPerSide = 20
-    // for (i <- 0 until boxesPerSide) {
-    //   for (j <- 0 until boxesPerSide) {
-    //     val w = 100.0
-    //     val x0 = -1000.0 + i*w
-    //     val z0 = -1000.0 + j*w
-    //     val y0 = 0.0
-    //     val x1 = x0 + w
-    //     val y1 = randomDouble(1, 101)
-    //     val z1 = z0 + w
+    val boxesPerSide = 20
+    for (i <- 0 until boxesPerSide) {
+      for (j <- 0 until boxesPerSide) {
+        val w = 100.0
+        val x0 = -1000.0 + i*w
+        val z0 = -1000.0 + j*w
+        val y0 = 0.0
+        val x1 = x0 + w
+        val y1 = randomDouble(1, 101)
+        val z1 = z0 + w
 
-    //     boxes1.add(Box(Vec3(x0, y0, z0), Vec3(x1, y1, z1), ground))
-    //   }
-    // }
+        boxes1.add(Box(Vec3(x0, y0, z0), Vec3(x1, y1, z1), ground))
+      }
+    }
 
     val world = HittableList()
-    // world.add(BvhNode(boxes1, 0, 1))
+    world.add(BvhNode(boxes1, 0, 1))
 
     val light = Light(Vec3(1, 1, 1), 7)
     world.add(XZRect(123, 423, 147, 412, 554, light))
 
-    // val centre1 = Vec3(400, 400, 200)
-    // val centre2 = centre1 + Vec3(30, 0, 0)
-    // val movingSphereMaterial = Lambertian(SolidColour(0.7, 0.3, 0.1))
-    // world.add(MovingSphere(centre1, centre2, 0, 1, 50, movingSphereMaterial))
+    val centre1 = Vec3(400, 400, 200)
+    val centre2 = centre1 + Vec3(30, 0, 0)
+    val movingSphereMaterial = Lambertian(SolidColour(0.7, 0.3, 0.1))
+    world.add(MovingSphere(centre1, centre2, 0, 1, 50, movingSphereMaterial))
 
-    // world.add(Sphere(Vec3(260, 150, 45), 50, Dialectric(1.5)))
-    // world.add(Sphere(Vec3(0, 150, 145), 50, Metal(Vec3(0.8, 0.8, 0.9), 10.0)))
+    world.add(Sphere(Vec3(260, 150, 45), 50, Dialectric(1.5)))
+    world.add(Sphere(Vec3(0, 150, 145), 50, Metal(Vec3(0.8, 0.8, 0.9), 10.0)))
 
-    // var boundary = Sphere(Vec3(360, 150, 145), 70, Dialectric(1.5))
-    // world.add(boundary)
-    // world.add(ConstantMedium(boundary, 0.2, SolidColour(0.2, 0.4, 0.9)))
+    var boundary = Sphere(Vec3(360, 150, 145), 70, Dialectric(1.5))
+    world.add(boundary)
+    world.add(ConstantMedium(boundary, 0.2, SolidColour(0.2, 0.4, 0.9)))
 
-    val boundary = Sphere(Vec3(0, 0, 0), 5000, Dialectric(1.5))
+    boundary = Sphere(Vec3(0, 0, 0), 5000, Dialectric(1.5))
     world.add(ConstantMedium(boundary, 0.0001, SolidColour(1, 1, 1)))
 
-    // val emat = Lambertian(ImageTexture("/earthmap.jpg"))
-    // world.add(Sphere(Vec3(400, 200, 400), 100, emat))
+    val emat = Lambertian(ImageTexture("/earthmap.jpg"))
+    world.add(Sphere(Vec3(400, 200, 400), 100, emat))
 
-    // val perText = NoiseTexture(0.1)
-    // world.add(Sphere(Vec3(220, 280, 300), 80, Lambertian(perText)))
+    val perText = NoiseTexture(0.1)
+    world.add(Sphere(Vec3(220, 280, 300), 80, Lambertian(perText)))
 
-    // val boxes2 = HittableList()
-    // val white = Lambertian(SolidColour(0.73, 0.73, 0.73))
-    // val ns = 1000
-    // for (j <- 0 until ns) {
-    //   boxes2.add(Sphere(randomVec3(0, 165), 10, white))
-    // }
-    // world.add(Translate(RotateY(BvhNode(boxes2, 0.0, 1.0), 15), Vec3(-100, 270, 395)))
+    val boxes2 = HittableList()
+    val white = Lambertian(SolidColour(0.73, 0.73, 0.73))
+    val ns = 1000
+    for (j <- 0 until ns) {
+      boxes2.add(Sphere(randomVec3(0, 165), 10, white))
+    }
+    world.add(Translate(RotateY(BvhNode(boxes2, 0.0, 1.0), 15), Vec3(-100, 270, 395)))
   
     world
   }

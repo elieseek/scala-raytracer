@@ -15,12 +15,12 @@ import Utility._
 
 
 object Main extends App {
-  val aspectRatio = 16.0 / 9.0
-  val imageWidth = 1080
+  val aspectRatio = 1.0 / 1.0
+  val imageWidth = 1280
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 256
-  val maxDepth = 50
-  val partitionSize = 2 // # groups to split width/height into for multithreading (1 creates single-threaded)
+  val samplesPerPixel = 4096
+  val maxDepth = 25
+  val partitionSize = 8 // # groups to split width/height into for multithreading (1 creates single-threaded)
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
 
@@ -28,11 +28,13 @@ object Main extends App {
   // Set up camera
   val lookFrom = Vec3(475,278,-675)
   val lookAt = Vec3(278,278,0)
+  // val lookFrom = Vec3(7,4,6)
+  // val lookAt = Vec3(0,0,0)
   val vUp = Vec3(0,1,0)
   val distToFocus = (lookFrom-lookAt).length
   val aperture = 0.0
   val fov = 40
-  val cam = new Camera(lookFrom, lookAt, vUp, fov, aspectRatio, aperture, distToFocus, 0.0, 1.0)
+  val cam = Camera(lookFrom, lookAt, vUp, fov, aspectRatio, aperture, distToFocus, 0.0, 1.0)
 
   val widthPartitions = (0 until imageWidth).toArray.grouped(imageWidth/partitionSize).toArray
   val heightPartitions = (0 until imageHeight).toArray.grouped(imageHeight/partitionSize).toArray
@@ -54,7 +56,7 @@ object Main extends App {
   }
 
   val aggFuture = Future.sequence(futures)
-  var imageArray: ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]] = ArrayBuffer.fill(imageWidth, imageHeight, 3)(0)
+  var imageArray: Array[Array[Array[Int]]] = Array.fill(imageWidth, imageHeight, 3)(0)
   imageArray = Colour.writePixelMaps(Await.result(aggFuture, Duration.Inf), imageArray)
   Colour.writePNG(imageArray, imageHeight, imageWidth)
 }
