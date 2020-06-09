@@ -8,6 +8,7 @@ import java.io.File
 import scala.math.sqrt
 import scala.Double.PositiveInfinity
 import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.Map
 
 import Utility._
 import Vec3Utility._
@@ -32,19 +33,19 @@ object Colour {
     g = sqrt(scale * g)
     b = sqrt(scale * b)
 
-    val ir = clamp((256 * clamp(r, 0.0, 0.999)), 0, 256).toInt
-    val ig = clamp((256 * clamp(g, 0.0, 0.999)), 0, 256).toInt
-    val ib = clamp((256 * clamp(b, 0.0, 0.999)), 0, 256).toInt
-    ArrayBuffer(ir, ig, ib)
+    val ir = (256 * clamp(r, 0.0, 0.999)).toInt
+    val ig = (256 * clamp(g, 0.0, 0.999)).toInt
+    val ib = (256 * clamp(b, 0.0, 0.999)).toInt
+    Array(ir, ig, ib)
   }
 
-  def writeColourArray(imageArray: ArrayBuffer[Vector[Int]]) = {
+  def writeColourArray(imageArray: Array[Vector[Int]]) = {
     for (rgb <- imageArray) {
       println(s"${rgb(0)} ${rgb(1)} ${rgb(2)}")
     }
   }
   
-  def writePNG(imageArray: ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]], imageHeight: Int, imageWidth: Int) = {
+  def writePNG(imageArray: Array[Array[Array[Int]]], imageHeight: Int, imageWidth: Int) = {
     val image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_RGB)
     for (i <- 0 until imageWidth) {
       for (j <- 0 until imageHeight) {
@@ -56,32 +57,59 @@ object Colour {
     ImageIO.write(image, "png", outputFile)
   }
   
-  def averageImageArrays(arrays: IndexedSeq[ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]]], imageHeight: Int, imageWidth: Int, numThreads: Int) = {
-    val imageArray: ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]] = ArrayBuffer.fill(imageWidth, imageHeight, 3)(0)
+  def averageImageArrays(arrays: IndexedSeq[Array[Array[Array[Int]]]], imageHeight: Int, imageWidth: Int, numThreads: Int) = {
+    val imageArray: Array[Array[Array[Int]]] = Array.fill(imageWidth, imageHeight, 3)(0)
     for (i <- 0 until imageWidth) {
       for (j <- 0 until imageHeight) {
         val avgR = (arrays.map(x => x(i)(j)(0)).reduce(_+_)).toDouble / (numThreads).toDouble
         val avgG = (arrays.map(x => x(i)(j)(1)).reduce(_+_)).toDouble / (numThreads).toDouble
         val avgB = (arrays.map(x => x(i)(j)(2)).reduce(_+_)).toDouble / (numThreads).toDouble
-        imageArray(i)(j) = ArrayBuffer(avgR.toInt, avgG.toInt, avgB.toInt)
+        imageArray(i)(j) = Array(avgR.toInt, avgG.toInt, avgB.toInt)
       }
     }
     imageArray
   }
 
   def calcImageArray(cam: Camera, world: Hittable, imageHeight: Int, imageWidth: Int, samplesPerPixel: Int, maxDepth: Int) = {
-    val imageArray: ArrayBuffer[ArrayBuffer[ArrayBuffer[Int]]] = ArrayBuffer.fill(imageWidth, imageHeight, 3)(0)
+    val imageArray: Array[Array[Array[Int]]] = Array.fill(imageWidth, imageHeight, 3)(0)
     for (j <- imageHeight-1 to 0 by -1) {
       System.err.print(s"\rScanlines remaining: $j")
       for (i <- 0 until imageWidth) {
         var pixelColour = Vec3(0, 0, 0)
         for (s <- 0 until samplesPerPixel) {
-          var u = (i + randomDouble()) / (imageWidth-1).toDouble
-          val v = (j + randomDouble()) / (imageHeight-1).toDouble
-          var r = cam.getRay(u, v)
+          val u = (i + (s+randomDouble())/samplesPerPixel) / (imageWidth-1).toDouble
+          val v = (j + (s+randomDouble())/samplesPerPixel) / (imageHeight-1).toDouble
+          val r = cam.getRay(u, v)
           pixelColour += rayColour(r, world, maxDepth)
         }
         imageArray(i)(j) = aggregateColour(pixelColour, samplesPerPixel)
+      }
+    }
+    imageArray
+  }
+
+  def calcPartition(cam: Camera, world: Hittable, imageHeight: Int, imageWidth: Int, heightPartition: Array[Int], widthPartition: Array[Int], samplesPerPixel: Int, maxDepth: Int) = {
+    var pixelMap = Map[Tuple2[Int, Int], Array[Int]]()
+    var pixelColour = Vec3(0, 0, 0)
+    for (i <- widthPartition) {
+      for (j <- heightPartition) {
+        pixelColour = Vec3(0, 0, 0)
+        for (s <- 0 until samplesPerPixel) {
+          val u = (i + (s+randomDouble())/samplesPerPixel) / (imageWidth-1).toDouble
+          val v = (j + (s+randomDouble())/samplesPerPixel) / (imageHeight-1).toDouble
+          val r = cam.getRay(u, v)
+          pixelColour += rayColour(r, world, maxDepth)
+        }
+        pixelMap((i,j)) = aggregateColour(pixelColour, samplesPerPixel)
+      }
+    }
+    pixelMap
+  }
+  
+  def writePixelMaps(pixelMaps: ArrayBuffer[Map[Tuple2[Int, Int], Array[Int]]], imageArray: Array[Array[Array[Int]]]) = {
+    for (map <- pixelMaps) {
+      for ((k, rgb) <- map) {
+        imageArray(k._1)(k._2) = rgb
       }
     }
     imageArray
