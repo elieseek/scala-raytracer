@@ -16,25 +16,27 @@ import Utility._
 
 object Main extends App {
   val aspectRatio = 1.0 / 1.0
-  val imageWidth = 100
+  val imageWidth = 200
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 64
+  val samplesPerPixel = 128
   val maxDepth = 50
-  val partitionSize = 8 // # groups to split width/height into for multithreading (1 creates single-threaded)
+  val partitionSize = 4 // # groups to split width/height into for multithreading (1 creates single-threaded)
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
 
-  val world = Scene.randomSmoke() 
-  // Set up camera
-  val lookFrom = Vec3(475,278,-675)
-  val lookAt = Vec3(278,278,0)
-  // val lookFrom = Vec3(7,4,6)
-  // val lookAt = Vec3(0,0,0)
-  val vUp = Vec3(0,1,0)
-  val distToFocus = (lookFrom-lookAt).length
-  val aperture = 0.0
-  val fov = 40
-  val cam = Camera(lookFrom, lookAt, vUp, fov, aspectRatio, aperture, distToFocus, 0.0, 1.0)
+  val (scene, cam) = Scene.cornellBox(aspectRatio)
+  val world = BvhNode(scene, 0, 1)
+  val lights = HittableList()
+  lights.add(XZRect(213, 343, 227, 332, 554, Dialectric(0.0)))
+  // lights.add(Sphere(Vec3(190, 90, 190), 90, Dialectric(1.5)))
+
+  // lights.add(Sphere(Vec3(-30, 200, -200), 100.0, Dialectric(0.0)))
+  // lights.add(Sphere(Vec3(0, 1, 0), 1.0, Dialectric(0.0)))
+  // lights.add(Sphere(Vec3(4, 1, 0), 1.0, Dialectric(0.0)))
+  // lights.add(Sphere(Vec3(0, 0.4, 3), 0.4, Dialectric(0.0)))
+
+  // lights.add(XZRect(123, 423, 147, 412, 554, Dialectric(0.0)))
+  // lights.add(Sphere(Vec3(360, 150, 145), 70, Dialectric(1.5)))
 
   val widthPartitions = (0 until imageWidth).toArray.grouped(imageWidth/partitionSize).toArray
   val heightPartitions = (0 until imageHeight).toArray.grouped(imageHeight/partitionSize).toArray
@@ -51,7 +53,7 @@ object Main extends App {
       Future {
         print(s"\rcalculating partition $i/$total")
         i += 1
-        Colour.calcPartition(cam, world, imageHeight, imageWidth, h, w, samplesPerPixel, maxDepth)
+        Colour.calcPartition(cam, world, lights, imageHeight, imageWidth, h, w, samplesPerPixel, maxDepth)
     }
   }
 

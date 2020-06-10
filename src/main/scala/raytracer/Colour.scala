@@ -70,7 +70,7 @@ object Colour {
     imageArray
   }
 
-  def calcImageArray(cam: Camera, world: Hittable, imageHeight: Int, imageWidth: Int, samplesPerPixel: Int, maxDepth: Int) = {
+  def calcImageArray(cam: Camera, world: Hittable, lights: Hittable, imageHeight: Int, imageWidth: Int, samplesPerPixel: Int, maxDepth: Int) = {
     val imageArray: Array[Array[Array[Int]]] = Array.fill(imageWidth, imageHeight, 3)(0)
     for (j <- imageHeight-1 to 0 by -1) {
       System.err.print(s"\rScanlines remaining: $j")
@@ -80,7 +80,7 @@ object Colour {
           val u = (i + (s+randomDouble())/samplesPerPixel) / (imageWidth-1).toDouble
           val v = (j + (s+randomDouble())/samplesPerPixel) / (imageHeight-1).toDouble
           val r = cam.getRay(u, v)
-          pixelColour += rayColour(r, world, maxDepth)
+          pixelColour += rayColour(r, world, lights, maxDepth)
         }
         imageArray(i)(j) = aggregateColour(pixelColour, samplesPerPixel)
       }
@@ -88,7 +88,7 @@ object Colour {
     imageArray
   }
 
-  def calcPartition(cam: Camera, world: Hittable, imageHeight: Int, imageWidth: Int, heightPartition: Array[Int], widthPartition: Array[Int], samplesPerPixel: Int, maxDepth: Int) = {
+  def calcPartition(cam: Camera, world: Hittable, lights: Hittable, imageHeight: Int, imageWidth: Int, heightPartition: Array[Int], widthPartition: Array[Int], samplesPerPixel: Int, maxDepth: Int) = {
     var pixelMap = Map[Tuple2[Int, Int], Array[Int]]()
     var pixelColour = Vec3(0, 0, 0)
     for (i <- widthPartition) {
@@ -98,7 +98,7 @@ object Colour {
           val u = (i + (s+randomDouble())/samplesPerPixel) / (imageWidth-1).toDouble
           val v = (j + (s+randomDouble())/samplesPerPixel) / (imageHeight-1).toDouble
           val r = cam.getRay(u, v)
-          pixelColour += rayColour(r, world, maxDepth)
+          pixelColour += rayColour(r, world, lights, maxDepth)
         }
         pixelMap((i,j)) = aggregateColour(pixelColour, samplesPerPixel)
       }
@@ -115,7 +115,7 @@ object Colour {
     imageArray
   }
 
-  def rayColour(r: Ray, world: Hittable, depth: Int): Vec3 = {
+  def rayColour(r: Ray, world: Hittable, lights: Hittable, depth: Int): Vec3 = {
     if (depth <= 0) {
       Vec3(0, 0, 0)
     } else {
@@ -123,11 +123,17 @@ object Colour {
       case Some(newRecord: HitRecord) => 
         newRecord.mat match{
           case l: Light => l.scatter(r, newRecord) match {
-            case Some(scatter: Scatter) => scatter.attenuation
+            case Some(srec: ScatterRecord) => srec.attenuation
             case None => Vec3(0, 0, 0)
           }
           case m: Material => m.scatter(r, newRecord) match {
-            case Some(scatter: Scatter) => rayColour(scatter.scattered, world, depth-1) * scatter.attenuation
+            case Some(srec: ScatterRecord) =>
+                val lightPdf = HittablePdf(lights, newRecord.p)
+                val p = if (srec.isSpecular) srec.pdf else MixturePdf(lightPdf, srec.pdf)
+                val scatteredRay = Ray(newRecord.p, p.generate(), r.time())
+                val pdfVal = p.value(scatteredRay.direction())
+                rayColour(scatteredRay, world, lights, depth-1) * m.scatteringPdf(r, newRecord, scatteredRay) * srec.attenuation / pdfVal
+  
             case None => Vec3(0,0,0)
           }
         }
