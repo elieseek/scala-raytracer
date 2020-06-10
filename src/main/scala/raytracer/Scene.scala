@@ -4,6 +4,7 @@ import scala.collection.mutable.ArrayBuffer
 
 import Utility._
 import Vec3Utility._
+import java.io.DataOutput
 
 object Scene {
   def randomScene() = {
@@ -63,7 +64,7 @@ object Scene {
     world
   }
 
-  def staticScene() = {
+  def staticScene(aspectRatio: Double) = {
     var world = HittableList()
     val groundMaterial = Lambertian(SolidColour(0.5, 0.5, 0.5))
     world.add(Sphere(Vec3(0,-1000,0), 1000, groundMaterial))
@@ -89,11 +90,28 @@ object Scene {
     world.add(Sphere(Vec3(3.7, 0.4, 3), -0.35, ColouredDialectric(1.5, Vec3(0.05, 0.05, 0.05))))
 
     world.add(Sphere(Vec3(-30, 200, -200), 100.0, Light(Vec3(1.0, 1.0, 1.0), 10)))
-
-    world
+    
+    // Set up camera
+    val lookFrom = Vec3(13,4,3)
+    val lookAt = Vec3(0,0,0)
+    val vUp = Vec3(0,1,0)
+    val distToFocus = 10.0
+    val aperture = 0.1
+    val fov = 20
+    val t0 = 0.0
+    val t1 = 1.0
+    val cam = Camera(lookFrom, lookAt, vUp, fov, aspectRatio, aperture, distToFocus, t0, t1)
+    
+    var lights = HittableList()
+    lights.add(Sphere(Vec3(-30, 200, -200), 100.0, Dialectric(0.0)))
+    lights.add(Sphere(Vec3(0, 1, 0), 1.0, Dialectric(0.0)))
+    lights.add(Sphere(Vec3(4, 1, 0), 1.0, Dialectric(0.0)))
+    lights.add(Sphere(Vec3(0, 0.4, 3), 0.4, Dialectric(0.0)))
+    
+    (world, cam, lights)
   }
 
-  def twoSpheres() = {
+  def twoSpheres(aspectRatio: Double) = {
     var world = HittableList()
     val perText = NoiseTexture(4)
     world.add(Sphere(Vec3(0, -1000, 0), 1000, Lambertian(perText)))
@@ -101,7 +119,18 @@ object Scene {
 
     val light = Light(Vec3(1, 1, 1), 4)
     world.add(XYRect(3, 5, 1, 3, -2, light))
-    world
+
+    val lookFrom = Vec3(10,2,10)
+    val lookAt = Vec3(0,0,0)
+    val vUp = Vec3(0,1,0)
+    val distToFocus = 10.0
+    val aperture = 0.0
+    val fov = 20
+    val t0 = 0.0
+    val t1 = 1.0
+    val cam = Camera(lookFrom, lookAt, vUp, fov, aspectRatio, aperture, distToFocus, t0, t1)
+
+    (world, cam)
   }
 
   def earth() = {
@@ -111,16 +140,18 @@ object Scene {
     HittableList(globe)
   }
 
-  def cornellBox() = {
+  def cornellBox(aspectRatio: Double) = {
     var world = HittableList()
     val red = Lambertian(SolidColour(0.65, 0.05, 0.05))
     val white = Lambertian(SolidColour(0.73, 0.73, 0.73))
     val green = Lambertian(SolidColour(0.12, 0.45, 0.15))
+    val perText = Lambertian(NoiseTexture(0.02))
+    val aluminium = Metal(Vec3(0.8, 0.8, 0.9), 0.0)
     val light = Light(Vec3(1, 1, 1), 15)
 
     world.add(FlipFace(YZRect(0, 555, 0, 555, 555, green)))
     world.add(YZRect(0, 555, 0, 555, 0, red))
-    world.add(XZRect(213, 343, 227, 332, 554, light))
+    world.add(FlipFace(XZRect(213, 343, 227, 332, 554, light)))
     world.add(XZRect(0, 555, 0, 555, 0, white))
     world.add(FlipFace(XZRect(0, 555, 0, 555, 555, white)))
     world.add(FlipFace(XYRect(0, 555, 0, 555, 555, white)))
@@ -129,12 +160,28 @@ object Scene {
     box1 = Translate(box1, Vec3(265, 0, 295))
     world.add(box1)
     
-    var box2: Hittable = Box(Vec3(0, 0, 0), Vec3(165, 165, 165), white)
-    box2 = RotateY(box2, -18)
-    box2 = Translate(box2, Vec3(130, 0, 65))
+    // var box2: Hittable = Box(Vec3(0, 0, 0), Vec3(165, 165, 165), perText)
+    // box2 = RotateY(box2, -18)
+    // box2 = Translate(box2, Vec3(130, 0, 65))
+    val box2 = Sphere(Vec3(190, 90, 190), 90, aluminium)
     world.add(box2)
 
-    world
+    // Set up camera
+    val lookFrom = Vec3(278,278,-800)
+    val lookAt = Vec3(278,278,0)
+    val vUp = Vec3(0,1,0)
+    val distToFocus = 10.0
+    val aperture = 0.0
+    val fov = 40
+    val t0 = 0.0
+    val t1 = 1.0
+    val cam = Camera(lookFrom, lookAt, vUp, fov, aspectRatio, aperture, distToFocus, t0, t1)
+    
+    val lights = HittableList()
+    lights.add(XZRect(213, 343, 227, 332, 554, Dialectric(0.0)))
+    lights.add(Sphere(Vec3(190, 90, 190), 90, Dialectric(1.5)))
+    
+    (world, cam, lights)
   }
 
   def cornellSmoke() = {
@@ -166,16 +213,16 @@ object Scene {
     world
   }
 
-  def randomSmoke() = {
+  def randomSmoke(aspectRatio: Double) = {
     val boxes1 = HittableList()
     val ground = Lambertian(SolidColour(0.48, 0.83, 0.53))
 
-    val boxesPerSide = 20
+    val boxesPerSide = 10
     for (i <- 0 until boxesPerSide) {
       for (j <- 0 until boxesPerSide) {
         val w = 100.0
-        val x0 = -1000.0 + i*w
-        val z0 = -1000.0 + j*w
+        val x0 = -250 + i*w
+        val z0 = -250 + j*w
         val y0 = 0.0
         val x1 = x0 + w
         val y1 = randomDouble(1, 101)
@@ -189,7 +236,7 @@ object Scene {
     world.add(BvhNode(boxes1, 0, 1))
 
     val light = Light(Vec3(1, 1, 1), 7)
-    world.add(XZRect(123, 423, 147, 412, 554, light))
+    world.add(FlipFace(XZRect(123, 423, 147, 412, 554, light)))
 
     val centre1 = Vec3(400, 400, 200)
     val centre2 = centre1 + Vec3(30, 0, 0)
@@ -204,7 +251,7 @@ object Scene {
     world.add(ConstantMedium(boundary, 0.2, SolidColour(0.2, 0.4, 0.9)))
 
     boundary = Sphere(Vec3(0, 0, 0), 5000, Dialectric(1.5))
-    world.add(ConstantMedium(boundary, 0.0001, SolidColour(1, 1, 1)))
+    world.add(ConstantMedium(boundary, 0.00001, SolidColour(1, 1, 1)))
 
     val emat = Lambertian(ImageTexture("/earthmap.jpg"))
     world.add(Sphere(Vec3(400, 200, 400), 100, emat))
@@ -219,8 +266,22 @@ object Scene {
       boxes2.add(Sphere(randomVec3(0, 165), 10, white))
     }
     world.add(Translate(RotateY(BvhNode(boxes2, 0.0, 1.0), 15), Vec3(-100, 270, 395)))
-  
-    world
+    
+    val lookFrom = Vec3(475,278,-675)
+    val lookAt = Vec3(278,278,0)
+    val vUp = Vec3(0,1,0)
+    val distToFocus = (lookFrom-lookAt).length
+    val aperture = 0.1
+    val fov = 40
+    val t0 = 0.0
+    val t1 = 1.0
+    val cam = Camera(lookFrom, lookAt, vUp, fov, aspectRatio, aperture, distToFocus, t0, t1)
+    
+    var lights = HittableList()
+    lights.add(XZRect(123, 423, 147, 412, 554, Dialectric(0.0)))
+    lights.add(Sphere(Vec3(360, 150, 145), 70, Dialectric(1.5)))
+    
+    (world, cam, lights)
   }
 
   def smokeBall() = {

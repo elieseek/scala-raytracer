@@ -12,4 +12,4 @@ case class Ray(orig: Vec3, dir: Vec3, tm: Double = 0.0) {
   def *(t: Double) = Ray(this.orig, this.dir * t)
 }
 
-case class Scatter(var scattered: Ray, var attenuation: Vec3)
+case class ScatterRecord(var isSpecular: Boolean=false, var attenuation: Vec3, var pdf: Pdf)

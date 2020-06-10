@@ -13,6 +13,8 @@ import Utility._
 trait Hittable {
   def hit(r: Ray, tMin: Double, tMax: Double): Option[HitRecord]
   def boundingBox(t0: Double, t1: Double): Option[AABB]
+  def pdfValue(o: Vec3, v: Vec3): Double = 0.0
+  def random(o: Vec3): Vec3 = Vec3(1, 0, 0)
 }
 
 case class HitRecord(var p: Vec3, 

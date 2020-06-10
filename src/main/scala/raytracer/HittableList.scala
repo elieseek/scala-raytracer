@@ -2,6 +2,7 @@ package raytracer
 
 import scala.collection.mutable.ArrayBuffer
 import AABBUtility._
+import Utility._
 
 case class HittableList(objects: ArrayBuffer[Hittable]) extends Hittable {
   def clear() = objects.clear
@@ -45,6 +46,21 @@ case class HittableList(objects: ArrayBuffer[Hittable]) extends Hittable {
       Some(outputBox)
       
     }
+  }
+
+  override def pdfValue(o: Vec3, v: Vec3): Double = {
+    val weight = 1.0/objects.size
+    var sum = 0.0
+
+    for (obj <- objects) {
+      sum += weight * obj.pdfValue(o, v)
+    }
+    sum
+  }
+  
+  override def random(o: Vec3): Vec3 = {
+    val intSize = objects.size.toInt
+    objects(randomInt(intSize-1)).random(o)
   }
 }
 

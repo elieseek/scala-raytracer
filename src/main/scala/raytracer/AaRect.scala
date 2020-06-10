@@ -1,5 +1,11 @@
 package raytracer
 
+import scala.Double.PositiveInfinity
+import scala.math.abs
+
+import Vec3Utility._
+import Utility._
+
 case class XYRect(x0: Double, x1: Double, y0: Double, y1: Double, k: Double, mat: Material) extends Hittable {
   def hit(r: Ray, t0: Double, t1: Double) = {
     var rec =   HitRecord(Vec3(0,0,0), Vec3(0,0,0), Lambertian(SolidColour(0,0,0)), 0.0, 0.0, 0.0, false, Sphere(Vec3(0,0,0), 0.0, Lambertian(SolidColour(0,0,0))))
@@ -59,6 +65,24 @@ case class XZRect(x0: Double, x1: Double, z0: Double, z1: Double, k: Double, mat
   def boundingBox(t0: Double, t1: Double) = {
     val outputBox = AABB(Vec3(x0, k-0.0001, z0), Vec3(x1, k+0.0001, z1))
     Some(outputBox)
+  }
+
+  override def pdfValue(origin: Vec3, v: Vec3) = {
+    this.hit(Ray(origin, v), 0.001, PositiveInfinity) match {
+      case None => 0.0
+      case Some(rec: HitRecord) =>
+        val area = (x1-x0) * (z1-z0)
+        val distanceSquared = rec.t * rec.t * v.lengthSquared()
+        val cosine = abs(dot(v, rec.normal) / v.length())
+
+        distanceSquared / (cosine*area)
+    }
+    
+  }
+
+  override def random(o: Vec3): Vec3 = {
+    val randomPoint = Vec3(randomDouble(x0, x1), k, randomDouble(z0, z1))
+    randomPoint - o
   }
 }
 

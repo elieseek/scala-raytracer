@@ -16,25 +16,16 @@ import Utility._
 
 object Main extends App {
   val aspectRatio = 1.0 / 1.0
-  val imageWidth = 100
+  val imageWidth = 200
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 64
+  val samplesPerPixel = 256
   val maxDepth = 50
-  val partitionSize = 8 // # groups to split width/height into for multithreading (1 creates single-threaded)
+  val partitionSize = 4 // # groups to split width/height into for multithreading (1 creates single-threaded)
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
 
-  val world = Scene.randomSmoke() 
-  // Set up camera
-  val lookFrom = Vec3(475,278,-675)
-  val lookAt = Vec3(278,278,0)
-  // val lookFrom = Vec3(7,4,6)
-  // val lookAt = Vec3(0,0,0)
-  val vUp = Vec3(0,1,0)
-  val distToFocus = (lookFrom-lookAt).length
-  val aperture = 0.0
-  val fov = 40
-  val cam = Camera(lookFrom, lookAt, vUp, fov, aspectRatio, aperture, distToFocus, 0.0, 1.0)
+  val (scene, cam, lights) = Scene.cornellBox(aspectRatio)
+  val world = BvhNode(scene, 0, 1)
 
   val widthPartitions = (0 until imageWidth).toArray.grouped(imageWidth/partitionSize).toArray
   val heightPartitions = (0 until imageHeight).toArray.grouped(imageHeight/partitionSize).toArray
@@ -51,7 +42,7 @@ object Main extends App {
       Future {
         print(s"\rcalculating partition $i/$total")
         i += 1
-        Colour.calcPartition(cam, world, imageHeight, imageWidth, h, w, samplesPerPixel, maxDepth)
+        Colour.calcPartition(cam, world, lights, imageHeight, imageWidth, h, w, samplesPerPixel, maxDepth)
     }
   }
 
