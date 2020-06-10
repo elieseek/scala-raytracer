@@ -18,25 +18,14 @@ object Main extends App {
   val aspectRatio = 1.0 / 1.0
   val imageWidth = 200
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 128
+  val samplesPerPixel = 256
   val maxDepth = 50
   val partitionSize = 4 // # groups to split width/height into for multithreading (1 creates single-threaded)
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
 
-  val (scene, cam) = Scene.cornellBox(aspectRatio)
+  val (scene, cam, lights) = Scene.cornellBox(aspectRatio)
   val world = BvhNode(scene, 0, 1)
-  val lights = HittableList()
-  lights.add(XZRect(213, 343, 227, 332, 554, Dialectric(0.0)))
-  // lights.add(Sphere(Vec3(190, 90, 190), 90, Dialectric(1.5)))
-
-  // lights.add(Sphere(Vec3(-30, 200, -200), 100.0, Dialectric(0.0)))
-  // lights.add(Sphere(Vec3(0, 1, 0), 1.0, Dialectric(0.0)))
-  // lights.add(Sphere(Vec3(4, 1, 0), 1.0, Dialectric(0.0)))
-  // lights.add(Sphere(Vec3(0, 0.4, 3), 0.4, Dialectric(0.0)))
-
-  // lights.add(XZRect(123, 423, 147, 412, 554, Dialectric(0.0)))
-  // lights.add(Sphere(Vec3(360, 150, 145), 70, Dialectric(1.5)))
 
   val widthPartitions = (0 until imageWidth).toArray.grouped(imageWidth/partitionSize).toArray
   val heightPartitions = (0 until imageHeight).toArray.grouped(imageHeight/partitionSize).toArray

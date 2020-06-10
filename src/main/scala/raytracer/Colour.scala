@@ -133,7 +133,6 @@ object Colour {
                 val scatteredRay = Ray(newRecord.p, p.generate(), r.time())
                 val pdfVal = p.value(scatteredRay.direction())
                 rayColour(scatteredRay, world, lights, depth-1) * m.scatteringPdf(r, newRecord, scatteredRay) * srec.attenuation / pdfVal
-  
             case None => Vec3(0,0,0)
           }
         }
