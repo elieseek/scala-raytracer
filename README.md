@@ -2,6 +2,7 @@
 # scala-raytracer
 Learning scala by trying to create a raytracer using Peter Shirley's [series of guides on the topic](https://raytracing.github.io/books/RayTracingInOneWeekend.html#overview) written in C++
 # Result
+![Cornell Box](https://github.com/elieseek/scala-raytracer/blob/master/result/Cornell%20box.png)
 ![with lighting](https://github.com/elieseek/scala-raytracer/blob/master/result/lighting%201920.png)
 ![final product](https://github.com/elieseek/scala-raytracer/blob/master/result/final.png)
 
