@@ -11,6 +11,6 @@ Learning scala by trying to create a raytracer using Peter Shirley's [series of 
 - Multithreaded (without changing gamma)
 
 # Future work
-- Give all shapes a pdf value
+- Improve efficiency of importance sampling boxes
 - Improve multiple importance sampling
 - Invent time machine to go back and choose a faster language before starting this
