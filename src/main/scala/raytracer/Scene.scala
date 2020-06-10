@@ -155,7 +155,8 @@ object Scene {
     world.add(XZRect(0, 555, 0, 555, 0, white))
     world.add(FlipFace(XZRect(0, 555, 0, 555, 555, white)))
     world.add(FlipFace(XYRect(0, 555, 0, 555, 555, white)))
-    var box1: Hittable = Box(Vec3(0, 0, 0), Vec3(165, 330, 165), white)
+    
+    var box1: Hittable = Box(Vec3(0, 0, 0), Vec3(165, 330, 165), aluminium)
     box1 = RotateY(box1, 15)
     box1 = Translate(box1, Vec3(265, 0, 295))
     world.add(box1)
@@ -163,7 +164,7 @@ object Scene {
     // var box2: Hittable = Box(Vec3(0, 0, 0), Vec3(165, 165, 165), perText)
     // box2 = RotateY(box2, -18)
     // box2 = Translate(box2, Vec3(130, 0, 65))
-    val box2 = Sphere(Vec3(190, 90, 190), 90, aluminium)
+    val box2 = Sphere(Vec3(190, 90, 190), 90, Dialectric(1.5))
     world.add(box2)
 
     // Set up camera
@@ -179,7 +180,8 @@ object Scene {
     
     val lights = HittableList()
     lights.add(XZRect(213, 343, 227, 332, 554, Dialectric(0.0)))
-    lights.add(Sphere(Vec3(190, 90, 190), 90, Dialectric(1.5)))
+    lights.add(box2)
+    lights.add(box1)
     
     (world, cam, lights)
   }
