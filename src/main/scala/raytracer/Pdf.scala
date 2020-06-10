@@ -64,6 +64,14 @@ case class SpecularPdf(w: Vec3, f: Double, rIn: Ray) extends Pdf {
   }
 }
 
+case class RefractionPdf(w: Vec3, refIndex: Double, rIn: Ray) extends Pdf {
+  def value(direction: Vec3): Double = 1
+
+  def generate(): Vec3 = {
+    refractVec3(normalise(rIn.direction()), w, refIndex)
+  }
+}
+
 object Sampling { 
   def randomCosineDirection() = {
     val r1 = randomDouble()

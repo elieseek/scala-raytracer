@@ -17,13 +17,9 @@ trait Material {
 
 case class Lambertian(albedo: Texture) extends Material {
   def scatter(rIn: Ray, rec: HitRecord): Option[ScatterRecord] = {
-    // var uvw = new Onb()
-    // uvw.buildFromW(rec.normal)
-    // val scatterDirection = uvw.local(randomCosineDirection())
-    // val scatteredRay = Ray(rec.p, normalise(scatterDirection), rIn.time)
     val attenuation = albedo.value(rec.u, rec.v, rec.p)
     val pdf = CosinePdf(rec.normal)
-    Some(ScatterRecord(rIn, false, attenuation, pdf))
+    Some(ScatterRecord(false, attenuation, pdf))
   }
   override def scatteringPdf(rIn: Ray, rec: HitRecord, rScattered: Ray): Double = {
     val cosine = dot(rec.normal, normalise(rScattered.direction()))
@@ -33,12 +29,9 @@ case class Lambertian(albedo: Texture) extends Material {
 
 case class Metal(albedo: Vec3, fuzz: Double) extends Material {
   def scatter(rIn: Ray, rec: HitRecord): Option[ScatterRecord] = {
-    val f = clamp(fuzz, 0,1)
-    val reflected = reflectVec3(normalise(rIn.direction()), rec.normal)
-    val specularRay = Ray(rec.p, reflected + randomInUnitSphere()*f, rIn.time)
     val attenuation = albedo
-    val pdf = SpecularPdf(rec.normal, f, rIn)
-    Some(ScatterRecord(specularRay, true, attenuation, pdf))
+    val pdf = SpecularPdf(rec.normal, fuzz, rIn)
+    Some(ScatterRecord(true, attenuation, pdf))
   }
 
   override def scatteringPdf(rIn: Ray, rec: HitRecord, rScattered: Ray): Double = {
@@ -52,19 +45,23 @@ case class Dialectric(refIndex: Double) extends Material {
     val unitDirection = normalise(rIn.direction())
     val cosTheta = clamp(dot(unitDirection*(-1),rec.normal), -1, 1)
     val sinTheta = sqrt(1.0 - cosTheta*cosTheta)
-    val pdf = CosinePdf(rec.normal)
     // account for total internal reflection
-    if  ((etaiOverEtat * sinTheta > 1.0) || 
-        (randomDouble() < MaterialUtility.schlick(cosTheta, etaiOverEtat))) {
-      val reflected = reflectVec3(unitDirection, rec.normal)
-      Some(ScatterRecord(Ray(rec.p, reflected, rIn.time), true, Vec3(1, 1, 1), pdf))
-    } else {
-      val refracted = refractVec3(unitDirection, rec.normal, etaiOverEtat)
-      Some(ScatterRecord(Ray(rec.p, refracted, rIn.time), true, Vec3(1, 1, 1), pdf))
-    }
+    val pdf = if  (
+          (etaiOverEtat * sinTheta > 1.0) || 
+          (randomDouble() < MaterialUtility.schlick(cosTheta, etaiOverEtat))
+        ) {
+          SpecularPdf(rec.normal, 0.0, rIn)
+        } else {
+          RefractionPdf(rec.normal, etaiOverEtat, rIn)
+        }
+    Some(ScatterRecord(true, Vec3(1, 1, 1), pdf))
   }
+
+  override def scatteringPdf(rIn: Ray, rec: HitRecord, rScattered: Ray): Double = 1
 }
 
+// Fix inaccurate representation of colour
+// Also inefficient atm
 case class ColouredDialectric(refIndex: Double, albedo: Vec3) extends Material {
   def scatter(rIn: Ray, rec: HitRecord): Option[ScatterRecord] = {
     val etaiOverEtat = if (rec.frontFace) 1.0 / refIndex else refIndex
@@ -73,10 +70,10 @@ case class ColouredDialectric(refIndex: Double, albedo: Vec3) extends Material {
     val sinTheta = sqrt(1.0 - cosTheta*cosTheta)
     val pdf = CosinePdf(rec.normal)
     // account for total internal reflection
-    if  ((etaiOverEtat * sinTheta > 1.0) || 
+    if ((etaiOverEtat * sinTheta > 1.0) || 
         (randomDouble() < MaterialUtility.schlick(cosTheta, etaiOverEtat))) {
-      val reflected = reflectVec3(unitDirection, rec.normal)
-      Some(ScatterRecord(Ray(rec.p, reflected, rIn.time), true, Vec3(1,1,1), pdf))
+      val pdf = SpecularPdf(rec.normal, 0.0, rIn)
+      Some(ScatterRecord(true, Vec3(1,1,1), pdf))
     } else {
       val refracted = refractVec3(unitDirection, rec.normal, etaiOverEtat)
       val interiorDir = if (rec.frontFace) refracted else refracted * (-1)
@@ -85,8 +82,9 @@ case class ColouredDialectric(refIndex: Double, albedo: Vec3) extends Material {
         case Some(i: HitRecord) => (i.p - rec.p).length()
         case None => 0
       }
+      val pdf = RefractionPdf(rec.normal, etaiOverEtat, rIn)
       val attenuation = clampVec3(Vec3(1,1,1) - albedo*mediumTraveled, 0, 1)
-      Some(ScatterRecord(Ray(rec.p, refracted, rIn.time), true, attenuation, pdf))
+      Some(ScatterRecord(true, attenuation, pdf))
     }
   }
 }
@@ -94,16 +92,15 @@ case class ColouredDialectric(refIndex: Double, albedo: Vec3) extends Material {
 case class Light(colour: Vec3, intensity: Double) extends Material {
   def scatter(rIn: Ray, rec: HitRecord): Option[ScatterRecord] = {
     val pdf = CosinePdf(rec.normal)
-    if (rec.frontFace) Some(ScatterRecord(rIn, false, colour*intensity, pdf)) else None
+    if (rec.frontFace) Some(ScatterRecord(false, colour*intensity, pdf)) else None
   }
 }
 
 case class Isotropic(albedo: Texture) extends Material {
   def scatter(rIn: Ray, rec: HitRecord) = {
-    val scattered = Ray(rec.p, randomInUnitSphere(), rIn.time)
     val attenuation = albedo.value(rec.u, rec.v, rec.p)
     val pdf = VolumePdf()
-    Some(ScatterRecord(scattered, true, attenuation, pdf))
+    Some(ScatterRecord(true, attenuation, pdf))
   }
   override def scatteringPdf(rIn: Ray, rec: HitRecord, rScattered: Ray): Double = 4*Pi
 }

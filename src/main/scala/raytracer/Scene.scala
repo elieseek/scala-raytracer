@@ -149,7 +149,7 @@ object Scene {
     world.add(XZRect(0, 555, 0, 555, 0, white))
     world.add(FlipFace(XZRect(0, 555, 0, 555, 555, white)))
     world.add(FlipFace(XYRect(0, 555, 0, 555, 555, white)))
-    var box1: Hittable = Box(Vec3(0, 0, 0), Vec3(165, 330, 165), aluminium)
+    var box1: Hittable = Box(Vec3(0, 0, 0), Vec3(165, 330, 165), white)
     box1 = RotateY(box1, 15)
     box1 = Translate(box1, Vec3(265, 0, 295))
     world.add(box1)
