@@ -70,6 +70,10 @@ case class Translate(obj: Hittable, offset: Vec3) extends Hittable {
         Some(AABB(box.min + offset, box.max + offset))
     }
   }
+
+  override def pdfValue(o: Vec3, v: Vec3): Double = obj.pdfValue(o-offset, v)
+
+  override def random(o: Vec3): Vec3 = obj.random(o-offset)
 }
 
 case class RotateY(obj: Hittable, angle: Double) extends Hittable {
@@ -132,7 +136,24 @@ case class RotateY(obj: Hittable, angle: Double) extends Hittable {
     }
   }
 
-  def boundingBox(t0: Double, t1: Double) = {
-    box
+  def boundingBox(t0: Double, t1: Double) = box
+
+  override def pdfValue(o: Vec3, v: Vec3): Double = {
+    var rotatedO = o.copy()
+    rotatedO(0) = (o(0)*cos(+radians)) - (o(2)*sin(+radians))
+    rotatedO(2) = (o(0)*sin(+radians)) + (o(2)*cos(+radians))
+
+    var rotatedV = v.copy()
+    rotatedV(0) = (v(0)*cos(+radians)) - (v(2)*sin(+radians))
+    rotatedV(2) = (v(0)*sin(+radians)) + (v(2)*cos(+radians))
+
+    obj.pdfValue(rotatedO, rotatedV)
+  }
+  
+  override def random(o: Vec3): Vec3 = {
+    var rotatedO = o.copy()
+    rotatedO(0) = (o(0)*cos(+radians)) - (o(2)*sin(+radians))
+    rotatedO(2) = (o(0)*sin(+radians)) + (o(2)*cos(+radians))
+    obj.random(rotatedO)
   }
 }
