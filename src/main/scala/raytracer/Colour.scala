@@ -70,7 +70,7 @@ object Colour {
     imageArray
   }
 
-  def calcImageArray(cam: Camera, world: Hittable, lights: Hittable, imageHeight: Int, imageWidth: Int, samplesPerPixel: Int, maxDepth: Int) = {
+  def calcImageArray(cam: Camera, world: Hittable, lights: HittableList, imageHeight: Int, imageWidth: Int, samplesPerPixel: Int, maxDepth: Int) = {
     val imageArray: Array[Array[Array[Int]]] = Array.fill(imageWidth, imageHeight, 3)(0)
     for (j <- imageHeight-1 to 0 by -1) {
       System.err.print(s"\rScanlines remaining: $j")
@@ -88,7 +88,7 @@ object Colour {
     imageArray
   }
 
-  def calcPartition(cam: Camera, world: Hittable, lights: Hittable, imageHeight: Int, imageWidth: Int, heightPartition: Array[Int], widthPartition: Array[Int], samplesPerPixel: Int, maxDepth: Int) = {
+  def calcPartition(cam: Camera, world: Hittable, lights: HittableList, imageHeight: Int, imageWidth: Int, heightPartition: Array[Int], widthPartition: Array[Int], samplesPerPixel: Int, maxDepth: Int) = {
     var pixelMap = Map[Tuple2[Int, Int], Array[Int]]()
     var pixelColour = Vec3(0, 0, 0)
     for (i <- widthPartition) {
@@ -115,7 +115,7 @@ object Colour {
     imageArray
   }
 
-  def rayColour(r: Ray, world: Hittable, lights: Hittable, depth: Int): Vec3 = {
+  def rayColour(r: Ray, world: Hittable, lights: HittableList, depth: Int): Vec3 = {
     if (depth <= 0) {
       Vec3(0, 0, 0)
     } else {
@@ -128,11 +128,16 @@ object Colour {
           }
           case m: Material => m.scatter(r, newRecord) match {
             case Some(srec: ScatterRecord) =>
-                val lightPdf = HittablePdf(lights, newRecord.p)
-                val p = if (srec.isSpecular) srec.pdf else MixturePdf(lightPdf, srec.pdf)
+                 val p = if (srec.isSpecular) {
+                 srec.pdf
+                } else {
+                  val mixPdf: ArrayBuffer[Pdf] = ArrayBuffer(HittablePdf(lights, newRecord.p))
+                  mixPdf.append(srec.pdf)
+                  MixturePdf(mixPdf)
+                }
                 val scatteredRay = Ray(newRecord.p, p.generate(), r.time())
                 val pdfVal = p.value(scatteredRay.direction())
-                rayColour(scatteredRay, world, lights, depth-1) * m.scatteringPdf(r, newRecord, scatteredRay) * srec.attenuation / pdfVal
+                rayColour(scatteredRay, world, lights, depth-1) * srec.attenuation * m.scatteringPdf(r, newRecord, scatteredRay) / pdfVal
             case None => Vec3(0,0,0)
           }
         }
