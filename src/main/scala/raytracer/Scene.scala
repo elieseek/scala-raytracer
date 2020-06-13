@@ -149,23 +149,30 @@ object Scene {
     val aluminium = Metal(Vec3(0.8, 0.8, 0.9), 0.0)
     val light = Light(Vec3(1, 1, 1), 15)
 
-    world.add(FlipFace(YZRect(0, 555, 0, 555, 555, green)))
-    world.add(YZRect(0, 555, 0, 555, 0, red))
+    world.add(FlipFace(YZRect(0, 555, 0, 555, 555, red)))
+    world.add(YZRect(0, 555, 0, 555, 0, green))
     world.add(FlipFace(XZRect(213, 343, 227, 332, 554, light)))
     world.add(XZRect(0, 555, 0, 555, 0, white))
     world.add(FlipFace(XZRect(0, 555, 0, 555, 555, white)))
     world.add(FlipFace(XYRect(0, 555, 0, 555, 555, white)))
     
-    var box1: Hittable = Box(Vec3(0, 0, 0), Vec3(165, 330, 165), aluminium)
+    val mirror = YZRect(200-120, 200+120, 277.5-100, 277.5+100, 1, aluminium)
+    world.add(mirror)
+
+    var box1: Hittable = Box(Vec3(0, 0, 0), Vec3(165, 330, 165), white)
     box1 = RotateY(box1, 15)
     box1 = Translate(box1, Vec3(265, 0, 295))
     world.add(box1)
     
-    // var box2: Hittable = Box(Vec3(0, 0, 0), Vec3(165, 165, 165), perText)
-    // box2 = RotateY(box2, -18)
-    // box2 = Translate(box2, Vec3(130, 0, 65))
-    val box2 = Sphere(Vec3(190, 90, 190), 90, Dialectric(1.5))
+    var box2: Hittable = Box(Vec3(0, 0, 0), Vec3(165, 165, 165), white)
+    box2 = RotateY(box2, -18)
+    box2 = Translate(box2, Vec3(130, 0, 65))
     world.add(box2)
+
+    val boundary = Sphere(Vec3(190, 255, 190), 90, Dialectric(1.5))
+
+    world.add(boundary)
+    world.add(ConstantMedium(boundary, 0.02, SolidColour(0.2, 0.4, 0.9)))
 
     // Set up camera
     val lookFrom = Vec3(278,278,-800)
@@ -180,8 +187,9 @@ object Scene {
     
     val lights = HittableList()
     lights.add(XZRect(213, 343, 227, 332, 554, Dialectric(0.0)))
-    lights.add(box2)
-    lights.add(box1)
+    // lights.add(box2)
+    // lights.add(box1)
+    // lights.add(mirror)
     
     (world, cam, lights)
   }

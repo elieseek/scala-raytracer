@@ -7,6 +7,7 @@ import scala.math.sqrt
 
 import Vec3Utility._
 import Utility._
+import scala.collection.mutable
 
 trait  Pdf {
   def value(direction: Vec3): Double
@@ -36,14 +37,13 @@ case class HittablePdf(p: Hittable, origin: Vec3) extends Pdf {
   }
 }
 
-case class MixturePdf(p0: Pdf, p1: Pdf) extends Pdf {
-  val p = Array(p0, p1)
-  
+case class MixturePdf(p: mutable.ArrayBuffer[Pdf]) extends Pdf {
+  val len = p.length
   def value(direction: Vec3): Double = {
-    0.5 * p(0).value(direction) + 0.5*p(1).value(direction)
+    p.map(1/len.toDouble*_.value(direction)).reduce(_+_)
   }
   
-  def generate(): Vec3 = if (randomDouble() < 0.5) p(0).generate() else p(1).generate()
+  def generate(): Vec3 = p(randomInt(len-1)).generate()
 }
 
 case class VolumePdf() extends Pdf {

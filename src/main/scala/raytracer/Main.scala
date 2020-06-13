@@ -16,11 +16,11 @@ import Utility._
 
 object Main extends App {
   val aspectRatio = 1.0 / 1.0
-  val imageWidth = 200
+  val imageWidth = 500
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
   val samplesPerPixel = 256
   val maxDepth = 50
-  val partitionSize = 4 // # groups to split width/height into for multithreading (1 creates single-threaded)
+  val partitionSize = 8 // # groups to split width/height into for multithreading (1 creates single-threaded)
 
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
 
@@ -40,9 +40,10 @@ object Main extends App {
   val futures = (partitionTuples).map { 
     case (w, h) => 
       Future {
-        print(s"\rcalculating partition $i/$total")
+        val res = Colour.calcPartition(cam, world, lights, imageHeight, imageWidth, h, w, samplesPerPixel, maxDepth)
+        print(s"\rCompleted partition $i/$total")
         i += 1
-        Colour.calcPartition(cam, world, lights, imageHeight, imageWidth, h, w, samplesPerPixel, maxDepth)
+        res
     }
   }
 

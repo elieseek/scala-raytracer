@@ -4,10 +4,14 @@ import scala.collection.mutable.ArrayBuffer
 import AABBUtility._
 import Utility._
 
-case class HittableList(objects: ArrayBuffer[Hittable]) extends Hittable {
+case class HittableList(objects: ArrayBuffer[Hittable]) extends Hittable with Iterable[Hittable] {
   def clear() = objects.clear
   
   def add(obj: Hittable) = objects.append(obj)
+
+  override def map[B](f: Hittable => B): Iterable[B] = objects.map(f)
+
+  def iterator: Iterator[Hittable] = objects.to(Iterator)
 
   def hit(r: Ray, tMin: Double, tMax: Double): Option[HitRecord] = {
     var tempRec = HitRecord()
