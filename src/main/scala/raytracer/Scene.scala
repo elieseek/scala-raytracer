@@ -147,17 +147,19 @@ object Scene {
     val green = Lambertian(SolidColour(0.12, 0.45, 0.15))
     val perText = Lambertian(NoiseTexture(0.02))
     val aluminium = Metal(Vec3(0.8, 0.8, 0.9), 0.0)
+    val gold = Metal(Vec3(1.000, 0.766, 0.336), 0.05)
+    val glass = Dialectric(1.5)
     val light = Light(Vec3(1, 1, 1), 15)
 
     world.add(FlipFace(YZRect(0, 555, 0, 555, 555, red)))
     world.add(YZRect(0, 555, 0, 555, 0, green))
     world.add(FlipFace(XZRect(213, 343, 227, 332, 554, light)))
-    world.add(XZRect(0, 555, 0, 555, 0, white))
+    world.add(XZRect(0, 555, 0, 555, 0, gold))
     world.add(FlipFace(XZRect(0, 555, 0, 555, 555, white)))
     world.add(FlipFace(XYRect(0, 555, 0, 555, 555, white)))
     
-    val mirror = YZRect(200-120, 200+120, 277.5-100, 277.5+100, 1, aluminium)
-    world.add(mirror)
+    var mirror: Hittable = YZRect(200-120, 200+120, 277.5-200, 277.5+200, 1, aluminium)
+    //world.add(mirror)
 
     var box1: Hittable = Box(Vec3(0, 0, 0), Vec3(165, 330, 165), white)
     box1 = RotateY(box1, 15)
@@ -187,9 +189,10 @@ object Scene {
     
     val lights = HittableList()
     lights.add(XZRect(213, 343, 227, 332, 554, Dialectric(0.0)))
-    // lights.add(box2)
-    // lights.add(box1)
-    // lights.add(mirror)
+    //lights.add(box2)
+    //lights.add(box1)
+    //lights.add(mirror)
+    //lights.add(XZRect(0, 555, 0, 555, 0, gold))
     
     (world, cam, lights)
   }

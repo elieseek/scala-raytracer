@@ -45,7 +45,12 @@ object Colour {
     }
   }
   
-  def writePNG(imageArray: Array[Array[Array[Int]]], imageHeight: Int, imageWidth: Int) = {
+  def writePNG(image: BufferedImage) = {
+    val outputFile = new File("image.png")
+    ImageIO.write(image, "png", outputFile)
+  }
+
+  def createBufferedImage(imageArray: Array[Array[Array[Int]]], imageHeight: Int, imageWidth: Int) = {
     val image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_RGB)
     for (i <- 0 until imageWidth) {
       for (j <- 0 until imageHeight) {
@@ -53,8 +58,7 @@ object Colour {
         image.setRGB(i, imageHeight-j-1, ((rgb(0)*65536) + (rgb(1)*256) + rgb(2)) & 0xffffff)
       }
     }
-    val outputFile = new File("image.png")
-    ImageIO.write(image, "png", outputFile)
+    image
   }
   
   def averageImageArrays(arrays: IndexedSeq[Array[Array[Array[Int]]]], imageHeight: Int, imageWidth: Int, numThreads: Int) = {
@@ -95,8 +99,8 @@ object Colour {
       for (j <- heightPartition) {
         pixelColour = Vec3(0, 0, 0)
         for (s <- 0 until samplesPerPixel) {
-          val u = (i + (s+randomDouble())/samplesPerPixel) / (imageWidth-1).toDouble
-          val v = (j + (s+randomDouble())/samplesPerPixel) / (imageHeight-1).toDouble
+          val u = (i + (s+randomDouble(-1,1))/samplesPerPixel) / (imageWidth-1).toDouble
+          val v = (j + (s+randomDouble(-1,1))/samplesPerPixel) / (imageHeight-1).toDouble
           val r = cam.getRay(u, v)
           pixelColour += rayColour(r, world, lights, maxDepth)
         }

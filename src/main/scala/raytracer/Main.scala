@@ -13,15 +13,21 @@ import scala.math.sqrt
 import Vec3Utility._
 import Utility._
 
+import scala.swing._
+import javax.swing.ImageIcon
+
 
 object Main extends App {
   val aspectRatio = 1.0 / 1.0
   val imageWidth = 500
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 256
+  val samplesPerPixel = 64
   val maxDepth = 50
-  val partitionSize = 8 // # groups to split width/height into for multithreading (1 creates single-threaded)
-
+  val partitionSize = 100 // # groups to split width/height into for multithreading (1 creates single-threaded)
+  
+  val viewer = new Viewer
+  viewer.visible = true
+  
   print(s"P3\n${imageWidth} ${imageHeight}\n255\n")
 
   val (scene, cam, lights) = Scene.cornellBox(aspectRatio)
@@ -41,7 +47,9 @@ object Main extends App {
     case (w, h) => 
       Future {
         val res = Colour.calcPartition(cam, world, lights, imageHeight, imageWidth, h, w, samplesPerPixel, maxDepth)
-        print(s"\rCompleted partition $i/$total")
+        val prog = ((i.toDouble) / (total.toDouble) * 100).toInt
+        viewer.progress.value = prog
+        viewer.progress.label = s"$prog%"
         i += 1
         res
     }
@@ -50,5 +58,26 @@ object Main extends App {
   val aggFuture = Future.sequence(futures)
   var imageArray: Array[Array[Array[Int]]] = Array.fill(imageWidth, imageHeight, 3)(0)
   imageArray = Colour.writePixelMaps(Await.result(aggFuture, Duration.Inf), imageArray)
-  Colour.writePNG(imageArray, imageHeight, imageWidth)
+  val image = Colour.createBufferedImage(imageArray, imageHeight, imageWidth)
+  
+  viewer.contents = new FlowPanel {
+    contents += new Label() {
+      icon = new ImageIcon(image)
+    }
+    contents += new FlowPanel {
+      contents += new Button("Save as PNG") {
+        reactions += {
+          case event.ButtonClicked(_) => 
+            Colour.writePNG(image)
+            this.text="Saved!"
+        }
+      }
+      contents += new Button("Close") {
+        reactions += {
+          case event.ButtonClicked(_) => viewer.dispose()
+        }
+      }
+    }
+  }
+  viewer.centerOnScreen()
 }
