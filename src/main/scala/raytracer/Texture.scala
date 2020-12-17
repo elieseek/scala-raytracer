@@ -35,7 +35,7 @@ case class CheckerTexture(even: Texture, odd: Texture) extends Texture {
 case class NoiseTexture(scale: Double) extends Texture {
   val perlin = Perlin()
   def value(u: Double, v: Double, p: Vec3) = {
-    Vec3(1, 1, 1) * 0.5 * (1.0 + sin(scale*p.z + 10*perlin.turb(p)))
+    Vec3(1, 1, 1) * 0.5 * (1.0 + sin(scale*p.z + 10*perlin.turb(p*scale)))
   }
 }
 
