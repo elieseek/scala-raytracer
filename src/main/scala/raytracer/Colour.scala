@@ -6,6 +6,8 @@ import javax.imageio.ImageIO
 import java.io.File
 
 import scala.math.sqrt
+import scala.math.pow
+import scala.math.abs
 import scala.Double.PositiveInfinity
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.Map
@@ -92,7 +94,7 @@ object Colour {
     imageArray
   }
 
-  def calcPartition(cam: Camera, world: Hittable, lights: HittableList, imageHeight: Int, imageWidth: Int, heightPartition: Array[Int], widthPartition: Array[Int], samplesPerPixel: Int, maxDepth: Int) = {
+  def calcPartitionOld(cam: Camera, world: Hittable, lights: HittableList, imageHeight: Int, imageWidth: Int, heightPartition: Array[Int], widthPartition: Array[Int], samplesPerPixel: Int, maxDepth: Int) = {
     var pixelMap = Map[Tuple2[Int, Int], Array[Int]]()
     var pixelColour = Vec3(0, 0, 0)
     for (i <- widthPartition) {
@@ -108,6 +110,61 @@ object Colour {
       }
     }
     pixelMap
+  }
+
+  def calcPartition(cam: Camera, world: Hittable, lights: HittableList, imageHeight: Int, imageWidth: Int, heightPartition: Array[Int], widthPartition: Array[Int], samplesPerPixel: Int, maxDepth: Int) = {
+    var pixelMap = Map[Tuple2[Int, Int], Array[Int]]()
+    for (i <- widthPartition) {
+      for (j <- heightPartition) {
+        var (pixelColour, nSamples) = adaptiveSuperSampling(cam,world,lights,maxDepth,i,j,1.0,samplesPerPixel,Vec3(0,0,0), imageHeight, imageWidth, 0)
+        pixelMap((i,j)) = aggregateColour(pixelColour, nSamples)
+      }
+    }
+    pixelMap
+  }
+
+  def adaptiveSuperSampling(cam: Camera, world: Hittable, lights: HittableList, maxDepth: Int, x: Double, y: Double, step: Double, maxSamples: Int, totalColour: Vec3, imageHeight: Int, imageWidth: Int, nSamples: Int): Tuple2[Vec3, Int] = {
+    var corners = new Array[Vec3](4)
+      var index: Int = 0
+      for (i <- 0 to 1) {
+        for (j <- 0 to 1) {
+          val u = (x + i*step) / imageWidth.toDouble
+          val v = (y + j*step) / imageHeight.toDouble
+          val r = cam.getRay(u, v)
+          corners(index) = rayColour(r,world,lights,maxDepth)
+          index += 1
+        }
+      }
+      var cornerSum = corners.reduce(_+_)
+    if (nSamples > maxSamples) { (cornerSum+totalColour, nSamples+4) } else {
+      val average = cornerSum / 4.0
+      var homogenous = true
+      for (p <- corners) {
+        for (i <- 0 to 2) {
+          if (abs(p(i)-average(i))/average(i) > 0) {
+            homogenous = false
+          }
+        }
+      }
+      if (homogenous == true) {
+        (cornerSum, nSamples+4)
+      } else {
+        var newSamples: Int = nSamples
+        var newColour = totalColour
+        val nextStep: Double = step / 2.0
+        for (i <- 0 to 1) {
+          for (j <- 0 to 1) {
+            val dx = i*nextStep
+            val dy = j*nextStep
+            val (subsetColours, subsetSamples): Tuple2[Vec3, Int] = adaptiveSuperSampling(cam, world, lights, maxDepth, x+dx, y+dy, nextStep, maxSamples, newColour, imageHeight, imageWidth, newSamples+4)
+            newSamples += subsetSamples
+            newColour += subsetColours
+          }
+        }
+        (newColour, nSamples+newSamples)
+      }
+    }
+    
   }
   
   def writePixelMaps(pixelMaps: ArrayBuffer[Map[Tuple2[Int, Int], Array[Int]]], imageArray: Array[Array[Array[Int]]]) = {

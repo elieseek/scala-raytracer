@@ -46,6 +46,10 @@ object Vec3Utility {
     )
   }
 
+  def sumElements(v: Vec3) = {
+    v.x + v.y + v.z
+  }
+
   def clampVec3(v: Vec3, min: Double, max: Double) = Vec3(clamp(v.x, min, max), clamp(v.y, min, max), clamp(v.z, min, max))
 
   def normalise(v: Vec3) = v / v.length

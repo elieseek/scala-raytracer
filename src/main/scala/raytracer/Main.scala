@@ -21,9 +21,9 @@ object Main extends App {
   val aspectRatio = 1.0 / 1.0
   val imageWidth = 500
   val imageHeight = (imageWidth.toDouble / aspectRatio).toInt
-  val samplesPerPixel = 64
-  val maxDepth = 50
-  val partitionSize = 100 // # groups to split width/height into for multithreading (1 creates single-threaded)
+  val samplesPerPixel = 100
+  val maxDepth = 5
+  val partitionSize = 10 // # groups to split width/height into for multithreading (1 creates single-threaded)
   
   val viewer = new Viewer
   viewer.visible = true
@@ -46,7 +46,7 @@ object Main extends App {
   val futures = (partitionTuples).map { 
     case (w, h) => 
       Future {
-        val res = Colour.calcPartition(cam, world, lights, imageHeight, imageWidth, h, w, samplesPerPixel, maxDepth)
+        val res = Colour.calcPartitionOld(cam, world, lights, imageHeight, imageWidth, h, w, samplesPerPixel, maxDepth)
         val prog = ((i.toDouble) / (total.toDouble) * 100).toInt
         viewer.progress.value = prog
         viewer.progress.label = s"$prog%"
